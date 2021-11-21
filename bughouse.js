@@ -13,125 +13,83 @@ for (let i = 0; i < 8; i++) {
 //---------- Classes
 
 class Pawn {
-  constructor(type, color, position, isAlive = true) {
+  constructor(type, color, position, isAlive = true, isNew = true) {
     this.type = type;
     this.color = color;
     this.position = position; // array[row, column]
     this.isAlive = isAlive;
+    this.isNew = isNew;
   }
   checkValidMove(row2, col2) {
-    //to add capture
     const row1 = this.position[0];
     const col1 = this.position[1];
-
-    //check if the destination square is occupied, thus invalid
-    // to add
 
     if (col1 !== col2) {
       return false;
     }
     if (this.color === "white") {
-      if (row1 + 1 === row2 || row1 + 2 === row2) {
+      if (this.isNew === true && row1 + 2 === row2) {
+        return true;
+      } else if (row1 + 1 === row2) {
         return true;
       } else {
         return false;
       }
-    } else {
-      if (row2 + 1 === row1 || row2 + 2 === row1) {
+    } else if (this.color === "black") {
+      if (this.isNew === true && row2 + 2 === row1) {
+        return true;
+      } else if (row2 + 1 === row1) {
         return true;
       } else {
         return false;
       }
     }
   }
-}
 
-class Rook {
-  constructor(type, color, position, isAlive = true) {
-    this.type = type;
-    this.color = color;
-    this.position = position; // array[row, column]
-    this.isAlive = isAlive;
-  }
-  checkValidMove(row2, col2) {
+  checkCaptureMove(row2, col2) {
     const row1 = this.position[0];
     const col1 = this.position[1];
 
-    //check if there is any pieces in between original square and target square
-    function checkInBetween(axis) {
-      if (axis === "row") {
-        for (let i = Math.min(row1, row2) + 1; i < Math.max(row1, row2); i++) {
-          if (
-            activePieces.find(
-              ({ position }) => position[0] === i && position[1] === col1
-            ) !== undefined
-          ) {
-            return false;
-          }
-        }
-      } else {
-        for (let i = Math.min(col1, col2) + 1; i < Math.max(col1, col2); i++) {
-          if (
-            activePieces.find(
-              ({ position }) => position[0] === row1 && position[1] === i
-            ) !== undefined
-          ) {
-            return false;
-          }
-        }
+    if (this.color === "white") {
+      if (row1 + 1 === row2 && Math.abs(col1 - col2) === 1) {
+        return true;
       }
-      return true;
-    }
-
-    if (row1 !== row2 && col1 !== col2) {
-      return false;
-    } else if (row1 == row2) {
-      if (checkInBetween("column") === false) return false;
-      else return true;
-    } else {
-      if (checkInBetween("row") === false) return false;
-      // to review
-      else return true;
-    }
-  }
-}
-
-class Knight {
-  constructor(type, color, position, isAlive = true) {
-    this.type = type;
-    this.color = color;
-    this.position = position; // array[row, column]
-    this.isAlive = isAlive;
-  }
-  checkValidMove(row2, col2) {
-    //to add capture
-    const row1 = this.position[0];
-    const col1 = this.position[1];
-
-    if (
-      Math.abs(row2 - row1) + Math.abs(col2 - col1) === 3 &&
-      Math.abs(row2 - row1) !== 3 &&
-      Math.abs(col2 - col1) === 3
-    ) {
-      return true;
+    } else if (this.color === "black") {
+      if (row2 + 1 === row1 && Math.abs(col1 - col2) === 1) {
+        return true;
+      }
     } else return false;
   }
 }
 
-class Bishop {
-  constructor(type, color, position, isAlive = true) {
-    this.type = type;
-    this.color = color;
-    this.position = position; // array[row, column]
-    this.isAlive = isAlive;
-  }
-  checkValidMove(row2, col2) {
-    //to add capture
-    const row1 = this.position[0];
-    const col1 = this.position[1];
-
-    //check if there is any pieces in between original square and target square
-    function checkInBetween() {
+function checkInBetween(axis, row1, col1, row2, col2) {
+  switch (axis) {
+    case "row": {
+      for (let i = Math.min(row1, row2) + 1; i < Math.max(row1, row2); i++) {
+        if (
+          activePieces.find(
+            ({ position }) => position[0] === i && position[1] === col1
+          ) !== undefined
+        ) {
+          console.log("blocked");
+          return false;
+        }
+      }
+      return true;
+    }
+    case "column": {
+      for (let i = Math.min(col1, col2) + 1; i < Math.max(col1, col2); i++) {
+        if (
+          activePieces.find(
+            ({ position }) => position[0] === row1 && position[1] === i
+          ) !== undefined
+        ) {
+          return false;
+        }
+      }
+      return true;
+    }
+    case "diagonal": {
       let step = Math.abs(row1 - row2) - 1;
       if (step == 0) {
         return true;
@@ -141,7 +99,7 @@ class Bishop {
           if (
             activePieces.find(
               ({ position }) =>
-                position[0] === row1 - step && position[1] === col2 - step
+                position[0] === row1 - step && position[1] === col1 - step
             ) !== undefined
           ) {
             return false;
@@ -171,7 +129,6 @@ class Bishop {
                 position[0] === row1 + step && position[1] === col1 - step
             ) !== undefined
           ) {
-            console.log("Hi");
             return false;
           }
         }
@@ -179,10 +136,71 @@ class Bishop {
       }
       return true;
     }
+  }
+}
+
+class Rook {
+  constructor(type, color, position, isAlive = true) {
+    this.type = type;
+    this.color = color;
+    this.position = position; // array[row, column]
+    this.isAlive = isAlive;
+  }
+  checkValidMove(row2, col2) {
+    const row1 = this.position[0];
+    const col1 = this.position[1];
+
+    if (row1 !== row2 && col1 !== col2) {
+      return false;
+    } else if (row1 == row2) {
+      if (checkInBetween("column", row1, col1, row2, col2) === false)
+        return false;
+      else return true;
+    } else {
+      if (checkInBetween("row", row1, col1, row2, col2) === false) return false;
+      // to review
+      else return true;
+    }
+  }
+}
+
+class Knight {
+  constructor(type, color, position, isAlive = true) {
+    this.type = type;
+    this.color = color;
+    this.position = position; // array[row, column]
+    this.isAlive = isAlive;
+  }
+  checkValidMove(row2, col2) {
+    //to add capture
+    const row1 = this.position[0];
+    const col1 = this.position[1];
+
+    if (
+      Math.abs(row2 - row1) + Math.abs(col2 - col1) === 3 &&
+      Math.abs(row2 - row1) !== 3 &&
+      Math.abs(col2 - col1) !== 3
+    ) {
+      return true;
+    } else return false;
+  }
+}
+
+class Bishop {
+  constructor(type, color, position, isAlive = true) {
+    this.type = type;
+    this.color = color;
+    this.position = position; // array[row, column]
+    this.isAlive = isAlive;
+  }
+  checkValidMove(row2, col2) {
+    //to add capture
+    const row1 = this.position[0];
+    const col1 = this.position[1];
 
     if (
       Math.abs(row2 - row1) === Math.abs(col2 - col1) &&
-      checkInBetween() === true
+      checkInBetween("diagonal", row1, col1, row2, col2) === true
     ) {
       return true;
     } else return false;
@@ -202,13 +220,22 @@ class Queen {
     const row1 = this.position[0];
     const col1 = this.position[1];
 
-    if (Math.abs(row2 - row1) === Math.abs(col2 - col1)) {
+    if (
+      Math.abs(row2 - row1) === Math.abs(col2 - col1) &&
+      checkInBetween("diagonal", row1, col1, row2, col2) === true
+    ) {
       return true;
-    }
-    if (row1 !== row2 && col1 !== col2) {
-      return false;
-    } else return true;
-    // to add
+    } else if (
+      row1 === row2 &&
+      checkInBetween("column", row1, col1, row2, col2) === true
+    ) {
+      return true;
+    } else if (
+      col1 === col2 &&
+      checkInBetween("row", row1, col1, row2, col2) === true
+    ) {
+      return true;
+    } else return false;
   }
 }
 
@@ -219,29 +246,25 @@ class King {
     this.position = position; // array[row, column]
     this.isAlive = isAlive;
   }
+
   checkValidMove(row2, col2) {
-    //to add capture
     const row1 = this.position[0];
     const col1 = this.position[1];
 
     if (
+      //diagonal move
       Math.abs(row2 - row1) === Math.abs(col2 - col1) &&
       Math.abs(row2 - row1) === 1
     ) {
       return true;
-    }
-    if (row1 !== row2 && col1 !== col2) {
-      return false;
-    } else if (Math.abs(row2 - row1) === 1 || Math.abs(col2 - col1) === 1) {
+    } else if (Math.abs(row1 - row2) + Math.abs(col1 - col2) === 1) {
       return true;
     } else return false;
-    // to add
   }
 }
 
 //-------------creating pieces
 
-// create pawns
 const activePieces = [];
 
 for (let i = 0; i < 8; i++) {
@@ -250,6 +273,7 @@ for (let i = 0; i < 8; i++) {
 for (let i = 0; i < 8; i++) {
   activePieces.push(new Pawn("pawn", "black", [6, i]));
 }
+
 activePieces.push(new Rook("rook", "white", [0, 0]));
 activePieces.push(new Rook("rook", "white", [0, 7]));
 activePieces.push(new Rook("rook", "black", [7, 0]));
@@ -289,7 +313,7 @@ function clickFunction(e) {
 
       // if empty square is selected
       if (activatedPiece === undefined) {
-        console.log("no piece is selected");
+        console.log("empty square is selected. Please reselect");
         stateDecrement();
       }
 
@@ -317,34 +341,80 @@ function clickFunction(e) {
       targetRow = Number(targetSquare[1]);
       targetCol = Number(targetSquare[3]);
 
+      isSameSquare =
+        activatedPieceRow === targetRow && activatedPieceCol === targetCol;
+      isOccupied =
+        activePieces.find(
+          ({ position }) =>
+            position[0] === targetRow && position[1] === targetCol
+        ) !== undefined;
+
       //insert function to check if it is the same square, which means cancel
-      if (activatedPieceRow === targetRow && activatedPieceCol === targetCol) {
-        console.log("same square selected");
+      if (isSameSquare === true) {
+        console.log("same square selected. Restart");
         stateDecrement();
         stateDecrement();
       } else {
-        console.log("different square selected");
-        if (activatedPiece.checkValidMove(targetRow, targetCol) === true) {
-          console.log("yes, it is a valid move");
+        console.log(`square ${targetRow},${targetCol} selected`);
 
+        // if target square is empty
+        if (isOccupied === false) {
+          if (activatedPiece.checkValidMove(targetRow, targetCol) === true) {
+            updateHTML(
+              activatedPieceRow,
+              activatedPieceCol,
+              targetRow,
+              targetCol,
+              activatedPiece.type
+            );
+            console.log(
+              `${activatedPiece.type} moved from ${activatedPieceRow},${activatedPieceCol} to ${targetRow},${targetCol}`
+            );
+            activePieces[activePieceIndex].position = [targetRow, targetCol];
+            if ((activatedPiece.type = "pawn")) {
+              activatedPiece.isNew = false;
+            }
+          } else {
+            stateDecrement();
+            stateDecrement();
+            console.log("invalid move");
+          }
+        }
+
+        // if target square is occupied
+        else {
           targetPiece = activePieces.find(
             ({ position }) =>
               position[0] === targetRow && position[1] === targetCol
           );
+          capturedPieceIndex = activePieces.indexOf(targetPiece);
 
-          // if the target square is occupied
-          if (targetPiece !== undefined) {
-            // if the target square is occupied, check if it is attacking own piece
-            if (targetPiece.color === activatedPiece.color) {
-              console.log("cannot capture piece of the same color");
-              stateDecrement();
-              stateDecrement();
-            }
+          // if target piece is the same color
+          if (targetPiece.color === activatedPiece.color) {
+            console.log("This is your own piece");
+            stateDecrement();
+            stateDecrement();
+          }
 
-            // capturing process
-            else {
+          // if target piece is the opponent
+          else {
+            if (
+              (activatedPiece.type !== "pawn" &&
+                activatedPiece.checkValidMove(targetRow, targetCol) === true) ||
+              (activatedPiece.type === "pawn" &&
+                activatedPiece.checkCaptureMove(targetRow, targetCol) === true)
+            ) {
+              console.log(
+                "Captured piece is removed from activatePieces array"
+              );
               console.log(activePieces[capturedPieceIndex]);
-              console.log("is captured");
+
+              console.log(
+                `${activatedPiece.type} captured ${targetPiece.type} and moved from ${activatedPieceRow},${activatedPieceCol} to ${targetRow},${targetCol}`
+              );
+              if (activatedPiece.type === "pawn") {
+                activatedPiece.isNew = false;
+              }
 
               // removing captured pieces from activePieces array
               activePieces.splice(capturedPieceIndex, 1);
@@ -356,23 +426,12 @@ function clickFunction(e) {
                 activatedPiece.type
               );
               activePieces[activePieceIndex].position = [targetRow, targetCol];
+            } else {
+              console.log("invalid move");
+              stateDecrement();
+              stateDecrement();
             }
           }
-          // if the target square is empty
-          else {
-            activePieces[activePieceIndex].position = [targetRow, targetCol];
-            updateHTML(
-              activatedPieceRow,
-              activatedPieceCol,
-              targetRow,
-              targetCol,
-              activatedPiece.type
-            );
-          }
-        } else {
-          console.log("Invalid move");
-          stateDecrement();
-          stateDecrement();
         }
       }
     }
@@ -449,5 +508,9 @@ let targetCol = 0;
 let targetPiece = "";
 // Index of captured piece in active pieces array, to be removed when captured
 let capturedPieceIndex = 0;
+
+// Second state variables
+let isSameSquare = false;
+let isOccupied = false;
 
 document.querySelector("#board").addEventListener("click", clickFunction);
