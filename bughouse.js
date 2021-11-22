@@ -28,7 +28,11 @@ class Pawn {
       return false;
     }
     if (this.color === "white") {
-      if (this.isNew === true && row1 + 2 === row2) {
+      if (
+        this.isNew === true &&
+        row1 + 2 === row2 &&
+        checkInBetween("row", row1, col1, row2, col2) === true
+      ) {
         return true;
       } else if (row1 + 1 === row2) {
         return true;
@@ -36,7 +40,11 @@ class Pawn {
         return false;
       }
     } else if (this.color === "black") {
-      if (this.isNew === true && row2 + 2 === row1) {
+      if (
+        this.isNew === true &&
+        row2 + 2 === row1 &&
+        checkInBetween("row", row1, col1, row2, col2) === true
+      ) {
         return true;
       } else if (row2 + 1 === row1) {
         return true;
