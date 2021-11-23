@@ -1,23 +1,32 @@
-//-------- Setting up chess board
-// Redundant??
-const boardArr = [];
+//-------- Setting up chess board coloring
+
+// for colors
+
+const backgroundLight =
+  "url('http://www.zingerbugimages.com/backgrounds/green_marble_background_seamless.jpg')";
+const backgroundDark =
+  "url('http://www.zingerbugimages.com/backgrounds/green_sand_stone.jpg')";
+const colorYellow = "yellow";
+
 for (let i = 0; i < 8; i++) {
-  boardArr[i] = [];
   for (let j = 0; j < 8; j++) {
-    boardArr[i][j] = [7 - i, j];
+    if ((i + j) % 2 === 0) {
+      const thisSquare = document.getElementById(`r${i}c${j}`);
+      thisSquare.style.backgroundImage = backgroundLight;
+    } else {
+      const thisSquare = document.getElementById(`r${i}c${j}`);
+      thisSquare.style.backgroundImage = backgroundDark;
+    }
   }
 }
-
-// ==> boardArr is a 2d array starting with [7,0]
 
 //---------- Classes
 
 class Pawn {
-  constructor(type, color, position, isAlive = true, isNew = true) {
+  constructor(type, color, position, isNew = true) {
     this.type = type;
     this.color = color;
     this.position = position; // array[row, column]
-    this.isAlive = isAlive;
     this.isNew = isNew;
   }
   checkValidMove(row2, col2) {
@@ -148,11 +157,10 @@ function checkInBetween(axis, row1, col1, row2, col2) {
 }
 
 class Rook {
-  constructor(type, color, position, isAlive = true) {
+  constructor(type, color, position) {
     this.type = type;
     this.color = color;
     this.position = position; // array[row, column]
-    this.isAlive = isAlive;
   }
   checkValidMove(row2, col2) {
     const row1 = this.position[0];
@@ -173,11 +181,10 @@ class Rook {
 }
 
 class Knight {
-  constructor(type, color, position, isAlive = true) {
+  constructor(type, color, position) {
     this.type = type;
     this.color = color;
     this.position = position; // array[row, column]
-    this.isAlive = isAlive;
   }
   checkValidMove(row2, col2) {
     //to add capture
@@ -195,11 +202,10 @@ class Knight {
 }
 
 class Bishop {
-  constructor(type, color, position, isAlive = true) {
+  constructor(type, color, position) {
     this.type = type;
     this.color = color;
     this.position = position; // array[row, column]
-    this.isAlive = isAlive;
   }
   checkValidMove(row2, col2) {
     //to add capture
@@ -217,11 +223,10 @@ class Bishop {
 }
 
 class Queen {
-  constructor(type, color, position, isAlive = true) {
+  constructor(type, color, position) {
     this.type = type;
     this.color = color;
     this.position = position; // array[row, column]
-    this.isAlive = isAlive;
   }
   checkValidMove(row2, col2) {
     //to add capture
@@ -248,11 +253,10 @@ class Queen {
 }
 
 class King {
-  constructor(type, color, position, isAlive = true, inCheck = false) {
+  constructor(type, color, position, inCheck = false) {
     this.type = type;
     this.color = color;
     this.position = position; // array[row, column]
-    this.isAlive = isAlive;
   }
 
   checkValidMove(row2, col2) {
@@ -304,9 +308,18 @@ console.log(activePieces);
 
 // ------------ function declarations
 
+// ------------ upon clicking the start button
+function startFunction() {
+  document.querySelector("button").remove();
+  document.querySelector("#board").addEventListener("click", clickFunction);
+  document.querySelector("#log").innerText = "White to start";
+}
+
+// ------------- main function
 function clickFunction(e) {
   if (e.target.className === "square") {
     stateIncrement();
+
     // at first click
     if (state === 1 || state === 3) {
       // determine row and column of the activated square
@@ -321,7 +334,7 @@ function clickFunction(e) {
 
       // if empty square is selected
       if (activatedPiece === undefined) {
-        console.log("empty square is selected. Please reselect");
+        logDisplay.innerText = "This is an empty square. Please reselect";
         stateDecrement();
       }
 
@@ -331,16 +344,17 @@ function clickFunction(e) {
           (state === 1 && activatedPiece.color === "white") ||
           (state === 3 && activatedPiece.color === "black")
         ) {
-          activePieceIndex = activePieces.indexOf(activatedPiece);
-          console.log(
-            activatedPiece.type + activePieces[activePieceIndex].type
+          const activatedHTML = document.getElementById(
+            `r${activatedPieceRow}c${activatedPieceCol}`
           );
+          activatedHTML.style.backgroundImage = "none";
+          activatedHTML.style.backgroundColor = colorYellow;
 
-          console.log(
-            `piece selected: ${activatedPiece.type} at ${activatedPieceRow},${activatedPieceCol}`
-          );
+          activePieceIndex = activePieces.indexOf(activatedPiece);
+
+          logDisplay.innerText = `piece selected: ${activatedPiece.type} at ${activatedPieceRow},${activatedPieceCol}`;
         } else {
-          console.log("wrong color selected");
+          log.innerText = "Wrong color";
           stateDecrement();
         }
       }
@@ -362,11 +376,14 @@ function clickFunction(e) {
 
       //insert function to check if it is the same square, which means cancel
       if (isSameSquare === true) {
-        console.log("same square selected. Restart");
+        logDisplay.innerText = "Cancelled";
+
+        unhighlightSquare(activatedPieceRow, activatedPieceCol);
+
         stateDecrement();
         stateDecrement();
       } else {
-        console.log(`square ${targetRow},${targetCol} selected`);
+        console.log(`target square ${targetRow},${targetCol} selected`);
 
         // if target square is empty
         if (isOccupied === false) {
@@ -380,7 +397,8 @@ function clickFunction(e) {
 
             // if in check and not released by next move, it is an invalid move and thus not moved
             if (inCheck !== "" && checkReleased === false) {
-              console.log("Invalid move - king is in check");
+              logDisplay.innerText = "Invalid move - king is in check";
+              unhighlightSquare(activatedPieceRow, activatedPieceCol);
               stateDecrement();
               stateDecrement();
             } else if (
@@ -392,22 +410,24 @@ function clickFunction(e) {
                 state === 4)
             ) {
               // if the move exposes own king to check, thus invalid move
-              console.log("invalid move - king is put into check");
+
+              logDisplay.innerText = "invalid move - king is put into check";
+              unhighlightSquare(activatedPieceRow, activatedPieceCol);
               stateDecrement();
               stateDecrement();
             } else {
-              // if not in check of released from in check
+              // if not in check or is released from in check
+
               updateHTML(
                 activatedPieceRow,
                 activatedPieceCol,
                 targetRow,
-                targetCol,
-                activatedPiece.type
+                targetCol
               );
-              console.log(
-                `${activatedPiece.type} moved from ${activatedPieceRow},${activatedPieceCol} to ${targetRow},${targetCol}`
-              );
+
+              logDisplay.innerText = `${activatedPiece.type} moved from ${activatedPieceRow},${activatedPieceCol} to ${targetRow},${targetCol}`;
               activePieces[activePieceIndex].position = [targetRow, targetCol];
+              unhighlightSquare(activatedPieceRow, activatedPieceCol);
 
               if (activatedPiece.type === "pawn") {
                 activatedPiece.isNew = false;
@@ -416,7 +436,7 @@ function clickFunction(e) {
           } else {
             stateDecrement();
             stateDecrement();
-            console.log("invalid move");
+            logDisplay.innerText = "invalid move";
           }
         }
 
@@ -431,7 +451,8 @@ function clickFunction(e) {
 
           // if target piece is the same color
           if (targetPiece.color === activatedPiece.color) {
-            console.log("This is your own piece");
+            logDisplay.innerText = `Unable to capture your own ${targetPiece.type}`;
+            unhighlightSquare(activatedPieceRow, activatedPieceCol);
             stateDecrement();
             stateDecrement();
           }
@@ -452,7 +473,8 @@ function clickFunction(e) {
               );
 
               if (inCheck !== "" && checkReleased === false) {
-                console.log("Invalid move - king is in check");
+                logDisplay.innerText = "Invalid move - king is in check";
+                unhighlightSquare(activatedPieceRow, activatedPieceCol);
                 stateDecrement();
                 stateDecrement();
               } else if (
@@ -464,17 +486,14 @@ function clickFunction(e) {
                   state === 4)
               ) {
                 // if the move exposes own king to check, thus invalid move
-                console.log("invalid move - king is put into check");
+                logDisplay.innerText = "invalid move - king is put into check";
+                unhighlightSquare(activatedPieceRow, activatedPieceCol);
                 stateDecrement();
                 stateDecrement();
               } else {
-                console.log(
-                  "Captured piece is removed from activatePieces array"
-                );
+                // capturing process starts
 
-                console.log(
-                  `${activatedPiece.type} captured ${targetPiece.type} and moved from ${activatedPieceRow},${activatedPieceCol} to ${targetRow},${targetCol}`
-                );
+                logDisplay.innerText = `${activatedPiece.type} captured ${targetPiece.type} and moved from ${activatedPieceRow},${activatedPieceCol} to ${targetRow},${targetCol}`;
                 if (activatedPiece.type === "pawn") {
                   activatedPiece.isNew = false;
                 }
@@ -490,12 +509,13 @@ function clickFunction(e) {
                   activatedPieceRow,
                   activatedPieceCol,
                   targetRow,
-                  targetCol,
-                  activatedPiece.type
+                  targetCol
                 );
+                unhighlightSquare(activatedPieceRow, activatedPieceCol);
               }
             } else {
-              console.log("invalid move");
+              logDisplay.innerText = "invalid move";
+              unhighlightSquare(activatedPieceRow, activatedPieceCol);
               stateDecrement();
               stateDecrement();
             }
@@ -508,30 +528,23 @@ function clickFunction(e) {
   }
 }
 
-function updateHTML(row1, col1, row2, col2, type) {
-  let initialToDisplay = "";
-  switch (type) {
-    case "pawn":
-      initialToDisplay = "P";
-      break;
-    case "rook":
-      initialToDisplay = "R";
-      break;
-    case "knight":
-      initialToDisplay = "N";
-      break;
-    case "bishop":
-      initialToDisplay = "B";
-      break;
-    case "queen":
-      initialToDisplay = "Q";
-      break;
-    case "king":
-      initialToDisplay = "K";
-      break;
+function updateHTML(row1, col1, row2, col2) {
+  const originalHTML = document.getElementById(`r${row1}c${col1}`);
+  const destinationHTML = document.getElementById(`r${row2}c${col2}`);
+
+  destinationHTML.innerHTML = originalHTML.innerHTML;
+
+  originalHTML.innerHTML = "";
+}
+
+function unhighlightSquare(row1, col1) {
+  const activatedHTML = document.getElementById(`r${row1}c${col1}`);
+
+  if ((row1 + col1) % 2 === 0) {
+    activatedHTML.style.backgroundImage = backgroundLight;
+  } else {
+    activatedHTML.style.backgroundImage = backgroundDark;
   }
-  document.querySelector(`#r${row1}c${col1}`).innerText = "X";
-  document.querySelector(`#r${row2}c${col2}`).innerText = initialToDisplay;
 }
 
 function checkFor(color, arr) {
@@ -678,4 +691,7 @@ let isOccupied = false;
 let inCheck = "";
 let checkReleased = true;
 
-document.querySelector("#board").addEventListener("click", clickFunction);
+// querySelector
+const logDisplay = document.getElementById("log");
+
+document.querySelector("button").addEventListener("click", startFunction);
