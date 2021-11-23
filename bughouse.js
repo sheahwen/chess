@@ -20,65 +20,7 @@ for (let i = 0; i < 8; i++) {
   }
 }
 
-//---------- Classes
-
-class Pawn {
-  constructor(type, color, position, isNew = true) {
-    this.type = type;
-    this.color = color;
-    this.position = position; // array[row, column]
-    this.isNew = isNew;
-  }
-  checkValidMove(row2, col2) {
-    const row1 = this.position[0];
-    const col1 = this.position[1];
-
-    if (col1 !== col2) {
-      return false;
-    }
-    if (this.color === "white") {
-      if (
-        this.isNew === true &&
-        row1 + 2 === row2 &&
-        checkInBetween("row", row1, col1, row2, col2) === true
-      ) {
-        return true;
-      } else if (row1 + 1 === row2) {
-        return true;
-      } else {
-        return false;
-      }
-    } else if (this.color === "black") {
-      if (
-        this.isNew === true &&
-        row2 + 2 === row1 &&
-        checkInBetween("row", row1, col1, row2, col2) === true
-      ) {
-        return true;
-      } else if (row2 + 1 === row1) {
-        return true;
-      } else {
-        return false;
-      }
-    }
-  }
-
-  checkCaptureMove(row2, col2) {
-    const row1 = this.position[0];
-    const col1 = this.position[1];
-
-    if (this.color === "white") {
-      if (row1 + 1 === row2 && Math.abs(col1 - col2) === 1) {
-        return true;
-      }
-    } else if (this.color === "black") {
-      if (row2 + 1 === row1 && Math.abs(col1 - col2) === 1) {
-        return true;
-      }
-    } else return false;
-  }
-}
-
+//common function
 function checkInBetween(axis, row1, col1, row2, col2) {
   switch (axis) {
     case "row": {
@@ -153,6 +95,65 @@ function checkInBetween(axis, row1, col1, row2, col2) {
       }
       return true;
     }
+  }
+}
+
+//---------- Classes
+
+class Pawn {
+  constructor(type, color, position, isNew = true) {
+    this.type = type;
+    this.color = color;
+    this.position = position; // array[row, column]
+    this.isNew = isNew;
+  }
+  checkValidMove(row2, col2) {
+    const row1 = this.position[0];
+    const col1 = this.position[1];
+
+    if (col1 !== col2) {
+      return false;
+    }
+    if (this.color === "white") {
+      if (
+        this.isNew === true &&
+        row1 + 2 === row2 &&
+        checkInBetween("row", row1, col1, row2, col2) === true
+      ) {
+        return true;
+      } else if (row1 + 1 === row2) {
+        return true;
+      } else {
+        return false;
+      }
+    } else if (this.color === "black") {
+      if (
+        this.isNew === true &&
+        row2 + 2 === row1 &&
+        checkInBetween("row", row1, col1, row2, col2) === true
+      ) {
+        return true;
+      } else if (row2 + 1 === row1) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  }
+
+  checkCaptureMove(row2, col2) {
+    const row1 = this.position[0];
+    const col1 = this.position[1];
+
+    if (this.color === "white") {
+      if (row1 + 1 === row2 && Math.abs(col1 - col2) === 1) {
+        return true;
+      }
+    } else if (this.color === "black") {
+      if (row2 + 1 === row1 && Math.abs(col1 - col2) === 1) {
+        return true;
+      }
+    } else return false;
   }
 }
 
@@ -308,226 +309,6 @@ console.log(activePieces);
 
 // ------------ function declarations
 
-// ------------ upon clicking the start button
-function startFunction() {
-  document.querySelector("button").remove();
-  document.querySelector("#board").addEventListener("click", clickFunction);
-  document.querySelector("#log").innerText = "White to start";
-}
-
-// ------------- main function
-function clickFunction(e) {
-  if (e.target.className === "square") {
-    stateIncrement();
-
-    // at first click
-    if (state === 1 || state === 3) {
-      // determine row and column of the activated square
-      activatedPieceSquare = e.target.id;
-      activatedPieceRow = Number(activatedPieceSquare[1]);
-      activatedPieceCol = Number(activatedPieceSquare[3]);
-
-      activatedPiece = activePieces.find(
-        ({ position }) =>
-          position[0] === activatedPieceRow && position[1] === activatedPieceCol
-      );
-
-      // if empty square is selected
-      if (activatedPiece === undefined) {
-        logDisplay.innerText = "This is an empty square. Please reselect";
-        stateDecrement();
-      }
-
-      // if a piece is selected => check for color of piece selected
-      else {
-        if (
-          (state === 1 && activatedPiece.color === "white") ||
-          (state === 3 && activatedPiece.color === "black")
-        ) {
-          const activatedHTML = document.getElementById(
-            `r${activatedPieceRow}c${activatedPieceCol}`
-          );
-          activatedHTML.style.backgroundImage = "none";
-          activatedHTML.style.backgroundColor = colorYellow;
-
-          activePieceIndex = activePieces.indexOf(activatedPiece);
-
-          logDisplay.innerText = `piece selected: ${activatedPiece.type} at ${activatedPieceRow},${activatedPieceCol}`;
-        } else {
-          log.innerText = "Wrong color";
-          stateDecrement();
-        }
-      }
-    }
-
-    // at second click
-    else if (state === 2 || state === 4) {
-      targetSquare = e.target.id;
-      targetRow = Number(targetSquare[1]);
-      targetCol = Number(targetSquare[3]);
-
-      isSameSquare =
-        activatedPieceRow === targetRow && activatedPieceCol === targetCol;
-      isOccupied =
-        activePieces.find(
-          ({ position }) =>
-            position[0] === targetRow && position[1] === targetCol
-        ) !== undefined;
-
-      //insert function to check if it is the same square, which means cancel
-      if (isSameSquare === true) {
-        logDisplay.innerText = "Cancelled";
-
-        unhighlightSquare(activatedPieceRow, activatedPieceCol);
-
-        stateDecrement();
-        stateDecrement();
-      } else {
-        console.log(`target square ${targetRow},${targetCol} selected`);
-
-        // if target square is empty
-        if (isOccupied === false) {
-          if (activatedPiece.checkValidMove(targetRow, targetCol) === true) {
-            checkReleased = checkForCheckReleased(
-              inCheck,
-              targetRow,
-              targetCol,
-              false
-            );
-
-            // if in check and not released by next move, it is an invalid move and thus not moved
-            if (inCheck !== "" && checkReleased === false) {
-              logDisplay.innerText = "Invalid move - king is in check";
-              unhighlightSquare(activatedPieceRow, activatedPieceCol);
-              stateDecrement();
-              stateDecrement();
-            } else if (
-              (checkForCheckReleased("white", targetRow, targetCol, false) ===
-                false &&
-                state === 2) ||
-              (checkForCheckReleased("black", targetRow, targetCol, false) ===
-                false &&
-                state === 4)
-            ) {
-              // if the move exposes own king to check, thus invalid move
-
-              logDisplay.innerText = "invalid move - king is put into check";
-              unhighlightSquare(activatedPieceRow, activatedPieceCol);
-              stateDecrement();
-              stateDecrement();
-            } else {
-              // if not in check or is released from in check
-
-              updateHTML(
-                activatedPieceRow,
-                activatedPieceCol,
-                targetRow,
-                targetCol
-              );
-
-              logDisplay.innerText = `${activatedPiece.type} moved from ${activatedPieceRow},${activatedPieceCol} to ${targetRow},${targetCol}`;
-              activePieces[activePieceIndex].position = [targetRow, targetCol];
-              unhighlightSquare(activatedPieceRow, activatedPieceCol);
-
-              if (activatedPiece.type === "pawn") {
-                activatedPiece.isNew = false;
-              }
-            }
-          } else {
-            stateDecrement();
-            stateDecrement();
-            logDisplay.innerText = "invalid move";
-          }
-        }
-
-        // if target square is occupied
-        else {
-          targetPiece = activePieces.find(
-            ({ position }) =>
-              position[0] === targetRow && position[1] === targetCol
-          );
-
-          capturedPieceIndex = activePieces.indexOf(targetPiece);
-
-          // if target piece is the same color
-          if (targetPiece.color === activatedPiece.color) {
-            logDisplay.innerText = `Unable to capture your own ${targetPiece.type}`;
-            unhighlightSquare(activatedPieceRow, activatedPieceCol);
-            stateDecrement();
-            stateDecrement();
-          }
-
-          // if target piece is the opponent
-          else {
-            if (
-              (activatedPiece.type !== "pawn" &&
-                activatedPiece.checkValidMove(targetRow, targetCol) === true) ||
-              (activatedPiece.type === "pawn" &&
-                activatedPiece.checkCaptureMove(targetRow, targetCol) === true)
-            ) {
-              checkReleased = checkForCheckReleased(
-                inCheck,
-                targetRow,
-                targetCol,
-                true
-              );
-
-              if (inCheck !== "" && checkReleased === false) {
-                logDisplay.innerText = "Invalid move - king is in check";
-                unhighlightSquare(activatedPieceRow, activatedPieceCol);
-                stateDecrement();
-                stateDecrement();
-              } else if (
-                (checkForCheckReleased("white", targetRow, targetCol, true) ===
-                  false &&
-                  state === 2) ||
-                (checkForCheckReleased("black", targetRow, targetCol, true) ===
-                  false &&
-                  state === 4)
-              ) {
-                // if the move exposes own king to check, thus invalid move
-                logDisplay.innerText = "invalid move - king is put into check";
-                unhighlightSquare(activatedPieceRow, activatedPieceCol);
-                stateDecrement();
-                stateDecrement();
-              } else {
-                // capturing process starts
-
-                logDisplay.innerText = `${activatedPiece.type} captured ${targetPiece.type} and moved from ${activatedPieceRow},${activatedPieceCol} to ${targetRow},${targetCol}`;
-                if (activatedPiece.type === "pawn") {
-                  activatedPiece.isNew = false;
-                }
-
-                // removing captured pieces from activePieces array
-                activePieces[activePieceIndex].position = [
-                  targetRow,
-                  targetCol,
-                ];
-                activePieces.splice(capturedPieceIndex, 1);
-
-                updateHTML(
-                  activatedPieceRow,
-                  activatedPieceCol,
-                  targetRow,
-                  targetCol
-                );
-                unhighlightSquare(activatedPieceRow, activatedPieceCol);
-              }
-            } else {
-              logDisplay.innerText = "invalid move";
-              unhighlightSquare(activatedPieceRow, activatedPieceCol);
-              stateDecrement();
-              stateDecrement();
-            }
-          }
-        }
-      }
-      inCheck = checkForCheck();
-      checkReleased = false;
-    }
-  }
-}
-
 function updateHTML(row1, col1, row2, col2) {
   const originalHTML = document.getElementById(`r${row1}c${col1}`);
   const destinationHTML = document.getElementById(`r${row2}c${col2}`);
@@ -557,7 +338,7 @@ function checkFor(color, arr) {
     (piece) => piece.color === "white" && piece.type === "king"
   );
 
-  // check
+  // return true is white king is in check
   if (color === "white") {
     for (const piece of arr.filter((piece) => piece.color === "black")) {
       if (
@@ -573,8 +354,10 @@ function checkFor(color, arr) {
         return true;
       }
     }
+    return false;
   }
 
+  // return true if black king is in check
   if (color === "black") {
     for (const piece of arr.filter((piece) => piece.color === "white")) {
       if (
@@ -587,55 +370,55 @@ function checkFor(color, arr) {
             blackKing.position[1]
           ) === true)
       ) {
+        console.log("black king is in check");
         return true;
       }
     }
+    return false;
   }
-  return false;
 }
 
-function checkForCheck() {
-  // retrieve kings' position
+function nextMoveCheck(color, isCapture) {
+  let removedPiece = "";
+  let temp = false;
 
-  if (checkFor("white", activePieces) === true) {
-    console.log("white king is in check");
-    return "white";
-  }
+  activePieces[activePieceIndex].position = [targetRow, targetCol];
 
-  if (checkFor("black", activePieces) === true) {
-    console.log("black king is in check");
-    return "black";
-  }
-
-  return "";
-} // => returning the king in check. "" means none in check
-
-function checkForCheckReleased(color, row2, col2, isCapture) {
-  let blackKing = activePieces.find(
-    (piece) => piece.color === "black" && piece.type === "king"
-  );
-
-  let whiteKing = activePieces.find(
-    (piece) => piece.color === "white" && piece.type === "king"
-  );
-
-  const clonedArray = activePieces.map((x) => x);
-  clonedArray[activePieceIndex].position = [row2, col2];
-  if (isCapture === true) {
-    clonedArray.splice(capturedPieceIndex, 1);
+  if (isCapture) {
+    removedPiece = activePieces.splice(capturedPieceIndex, 1);
   }
 
   if (color === "white") {
-    if (checkFor("white", clonedArray) === true) {
-      return false;
+    if (checkFor("white", activePieces)) {
+      temp = true;
     }
-  } else return true;
+  }
 
   if (color === "black") {
-    if (checkFor("black", clonedArray) === true) {
-      return false;
+    if (checkFor("black", activePieces)) {
+      temp = true;
     }
-  } else return true;
+  }
+
+  // console.log(removedPiece);
+  // console.log(temp);
+  // console.log(checkFor("white", activePieces));
+  // console.log(capturedPieceIndex);
+  // console.log(activatedPieceRow, activatedPieceCol);
+  // console.log(targetRow, targetCol);
+
+  if (isCapture) {
+    activePieces.splice(capturedPieceIndex, 0, removedPiece[0]);
+    console.log("below is the piece put back");
+    console.log(activePieces[capturedPieceIndex]);
+  }
+
+  activePieces[activePieceIndex].position = [
+    activatedPieceRow,
+    activatedPieceCol,
+  ];
+
+  return temp;
 }
 
 function stateIncrement() {
@@ -645,18 +428,10 @@ function stateIncrement() {
   }
 }
 
-function stateDecrement() {
-  state--;
-  if (state === 0) {
-    state = 4;
-  }
-}
+// ----------------------- variable declaration
 
-// states = ["none", "activated_piece", "destination_square"]
-let state = 0;
-
-// Type of activated piece, e.g. P, R, N
-let activatedPieceType = "";
+// states = ["activated_piece_white", "destination_square_white".... then black]
+let state = 1;
 
 // Activated piece, e.g. pawn_white_1
 let activatedPiece = "";
@@ -680,18 +455,149 @@ let targetCol = 0;
 
 // Target piece sitting on the target square
 let targetPiece = "";
+
 // Index of captured piece in active pieces array, to be removed when captured
 let capturedPieceIndex = 0;
 
 // Second state variables
 let isSameSquare = false;
 let isOccupied = false;
+let isSameColor = false;
+let isValidMove = false;
 
-// check for check variable
-let inCheck = "";
-let checkReleased = true;
+// check variable
+let inCheck = false;
+let inCheckNext = false;
 
 // querySelector
 const logDisplay = document.getElementById("log");
+
+// ------------ upon clicking the start button
+function startFunction() {
+  document.querySelector("button").remove();
+  document.querySelector("#board").addEventListener("click", gamePlay);
+  document.querySelector("#log").innerText = "White to start";
+}
+
+// ------------- main function
+
+function gamePlay(e) {
+  if (e.target.className === "square") {
+    if (state === 1 || state === 3) {
+      //first click
+
+      activatedPieceSquare = e.target.id;
+      activatedPieceRow = Number(activatedPieceSquare[1]);
+      activatedPieceCol = Number(activatedPieceSquare[3]);
+
+      activatedPiece = activePieces.find(
+        ({ position }) =>
+          position[0] === activatedPieceRow && position[1] === activatedPieceCol
+      );
+      activePieceIndex = activePieces.indexOf(activatedPiece);
+
+      console.log(activatedPiece);
+
+      // if empty square
+      if (activatedPiece === undefined) {
+        logDisplay.innerText = "empty square selected";
+      }
+
+      // if not empty square => check for color ~~~ proceed
+      else {
+        if (
+          (state === 1 && activatedPiece.color === "white") ||
+          (state === 3 && activatedPiece.color === "black")
+        ) {
+          logDisplay.innerText = `${activatedPiece.type} at ${activatedPieceRow},${activatedPieceCol} is selected`;
+          stateIncrement();
+        } else {
+          logDisplay.innerText = "wrong color is selected";
+        }
+      }
+    } else if (state === 2 || state === 4) {
+      //second click
+
+      targetSquare = e.target.id;
+      targetRow = Number(targetSquare[1]);
+      targetCol = Number(targetSquare[3]);
+
+      targetPiece = activePieces.find(
+        ({ position }) => position[0] === targetRow && position[1] === targetCol
+      );
+
+      console.log(targetPiece);
+
+      if (targetPiece !== undefined) {
+        capturedPieceIndex = activePieces.indexOf(targetPiece);
+      }
+
+      isSameSquare = activatedPieceSquare === targetSquare;
+      isOccupied = targetPiece !== undefined;
+      isSameColor = isOccupied && targetPiece.color === activatedPiece.color;
+
+      console.log(activePieces[0]);
+
+      // not run if targeting pieces of the same color
+      if (!isSameColor) {
+        if (state === 2) {
+          inCheck = checkFor("white", activePieces);
+          inCheckNext = nextMoveCheck("white", isOccupied);
+        } else {
+          inCheck = checkFor("black", activePieces);
+          inCheckNext = nextMoveCheck("black", isOccupied);
+        }
+      } else {
+        inCheck = false;
+        inCheckNext = false;
+      }
+
+      if (activatedPiece.type === "pawn" && isOccupied & !isSameColor) {
+        isValidMove = activatedPiece.checkCaptureMove(targetRow, targetCol);
+      } else {
+        isValidMove = activatedPiece.checkValidMove(targetRow, targetCol);
+      }
+
+      console.log(`incheck value before moving is ${inCheck}`);
+      console.log(`inchecknext value after moving is ${inCheckNext}`);
+
+      // same square
+      if (isSameSquare) {
+        logDisplay.innerText = "cancelled";
+        state--;
+      }
+      // different square
+      else {
+        // different square => if valid move or color is different
+        if (!isSameColor && isValidMove) {
+          if (!inCheck && inCheckNext) {
+            logDisplay.innerText = "invalid move - king is moved into check";
+          } else if (inCheck && inCheckNext) {
+            logDisplay.innerText = "invalid move - king is still in check";
+          } else {
+            logDisplay.innerText = `moved`;
+            activePieces[activePieceIndex].position = [targetRow, targetCol];
+            if (isOccupied) {
+              console.log(activePieces.splice(capturedPieceIndex, 1));
+
+              logDisplay.innerText = `captured`;
+            }
+            stateIncrement();
+            updateHTML(
+              activatedPieceRow,
+              activatedPieceCol,
+              targetRow,
+              targetCol
+            );
+          }
+        } else {
+          logDisplay.innerText = "invalid move";
+          state--;
+        }
+      }
+    }
+    console.log(`current state is ${state}`);
+  }
+}
 
 document.querySelector("button").addEventListener("click", startFunction);
