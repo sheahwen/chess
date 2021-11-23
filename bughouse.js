@@ -158,10 +158,11 @@ class Pawn {
 }
 
 class Rook {
-  constructor(type, color, position) {
+  constructor(type, color, position, isNew = true) {
     this.type = type;
     this.color = color;
     this.position = position; // array[row, column]
+    this.isNew = isNew;
   }
   checkValidMove(row2, col2) {
     const row1 = this.position[0];
@@ -254,10 +255,12 @@ class Queen {
 }
 
 class King {
-  constructor(type, color, position, inCheck = false) {
+  constructor(type, color, position, inCheck = false, isNew = true) {
     this.type = type;
     this.color = color;
     this.position = position; // array[row, column]
+    this.inCheck = inCheck;
+    this.isNew = isNew;
   }
 
   checkValidMove(row2, col2) {
@@ -269,13 +272,95 @@ class King {
       Math.abs(row2 - row1) === Math.abs(col2 - col1) &&
       Math.abs(row2 - row1) === 1
     ) {
+      console.log("Hi");
       return true;
     } else if (Math.abs(row1 - row2) + Math.abs(col1 - col2) === 1) {
+      console.log("Hi");
       return true;
+    } else if (
+      (row1 === 0 &&
+        row2 === 0 &&
+        col1 === 4 &&
+        col2 === 2 &&
+        this.color === "white" &&
+        this.isNew) ||
+      (row1 === 0 &&
+        row2 === 0 &&
+        col1 === 4 &&
+        col2 === 6 &&
+        this.color === "white" &&
+        this.isNew) ||
+      (row1 === 7 &&
+        row2 === 7 &&
+        col1 === 4 &&
+        col2 === 2 &&
+        this.color === "black" &&
+        this.isNew) ||
+      (row1 === 7 &&
+        row2 === 7 &&
+        col1 === 4 &&
+        col2 === 6 &&
+        this.color === "black" &&
+        this.isNew)
+    ) {
+      console.log(`${row1}, ${col1},${row2},${col2}`);
+      return castling(row1, col1, row2, col2);
     } else return false;
   }
 }
 
+//----------------castling function
+function castling(row1, col1, row2, col2) {
+  if (col2 === 2) {
+    console.log("lol");
+    const arr = [];
+    arr.push(findElement(row1, 0));
+    for (let i = 1; i < 4; i++) {
+      arr.push(findElement(row1, i));
+      if (arr[i] !== undefined) return false;
+      if (checkFor(arr[i].color, activePieces, row1, i)) {
+        return false;
+      }
+    }
+    if (row1 === 0) {
+      if (arr[0].type === "rook" && arr[0].color === "white" && arr[0].isNew) {
+        arr[0].position = [row1, 3];
+        updateHTML(row1, 0, row2, 3);
+        return true;
+      } else return false;
+    } else {
+      if (arr[0].type === "rook" && arr[0].color === "black" && arr[0].isNew) {
+        arr[0].position = [row1, 3];
+        updateHTML(row1, 0, row2, 3);
+        return true;
+      } else return false;
+    }
+  } else {
+    const arr = [];
+    arr.push(findElement(row1, 7));
+    for (let i = 6; i > 4; i--) {
+      arr.push(findElement(row1, i));
+      if (arr[i] !== undefined) return false;
+      if (checkFor(arr[0].color, activePieces, row1, i)) {
+        return false;
+      }
+    }
+
+    if (row1 === 0) {
+      if (arr[0].type === "rook" && arr[0].color === "white" && arr[0].isNew) {
+        arr[0].position = [row1, 5];
+        updateHTML(row1, 7, row2, 5);
+        return true;
+      } else return false;
+    } else {
+      if (arr[0].type === "rook" && arr[0].color === "black" && arr[0].isNew) {
+        arr[0].position = [row1, 5];
+        updateHTML(row1, 7, row2, 5);
+        return true;
+      } else return false;
+    }
+  }
+}
 //-------------creating pieces
 
 const activePieces = [];
@@ -328,28 +413,32 @@ function unhighlightSquare(row1, col1) {
   }
 }
 
-function checkFor(color, arr) {
+function checkFor(color, arr, row = undefined, col = undefined) {
   // locating the kings
-  let blackKing = arr.find(
-    (piece) => piece.color === "black" && piece.type === "king"
-  );
+  if (row === undefined) {
+    let blackKing = activePieces.find(
+      (piece) => piece.color === "black" && piece.type === "king"
+    );
 
-  let whiteKing = arr.find(
-    (piece) => piece.color === "white" && piece.type === "king"
-  );
+    let whiteKing = activePieces.find(
+      (piece) => piece.color === "white" && piece.type === "king"
+    );
+
+    if (color === "white") {
+      row = whiteKing.position[0];
+      col = whiteKing.position[1];
+    } else {
+      row = blackKing.position[0];
+      col = blackKing.position[1];
+    }
+  }
 
   // return true is white king is in check
   if (color === "white") {
     for (const piece of arr.filter((piece) => piece.color === "black")) {
       if (
-        (piece.type !== "pawn" &&
-          piece.checkValidMove(whiteKing.position[0], whiteKing.position[1]) ===
-            true) ||
-        (piece.type === "pawn" &&
-          piece.checkCaptureMove(
-            whiteKing.position[0],
-            whiteKing.position[1]
-          ) === true)
+        (piece.type !== "pawn" && piece.checkValidMove(row, col) === true) ||
+        (piece.type === "pawn" && piece.checkCaptureMove(row, col) === true)
       ) {
         return true;
       }
@@ -361,14 +450,8 @@ function checkFor(color, arr) {
   if (color === "black") {
     for (const piece of arr.filter((piece) => piece.color === "white")) {
       if (
-        (piece.type !== "pawn" &&
-          piece.checkValidMove(blackKing.position[0], blackKing.position[1]) ===
-            true) ||
-        (piece.type === "pawn" &&
-          piece.checkCaptureMove(
-            blackKing.position[0],
-            blackKing.position[1]
-          ) === true)
+        (piece.type !== "pawn" && piece.checkValidMove(row, col) === true) ||
+        (piece.type === "pawn" && piece.checkCaptureMove(row, col) === true)
       ) {
         console.log("black king is in check");
         return true;
@@ -426,6 +509,12 @@ function stateIncrement() {
   if (state === 5) {
     state = 1;
   }
+}
+
+function findElement(row, col) {
+  return activePieces.find(
+    ({ position }) => position[0] === row && position[1] === col
+  );
 }
 
 // ----------------------- variable declaration
@@ -582,6 +671,15 @@ function gamePlay(e) {
 
               logDisplay.innerText = `captured`;
             }
+
+            if (activatedPiece.type === "pawn") {
+              activatedPiece.isNew = false;
+            } else if (activatedPiece.type === "rook") {
+              activatedPiece.isNew = false;
+            } else if (activatedPiece.type === "king") {
+              activatedPiece.isNew = false;
+            }
+
             stateIncrement();
             updateHTML(
               activatedPieceRow,
