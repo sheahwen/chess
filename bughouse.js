@@ -318,7 +318,7 @@ function castling(row1, col1, row2, col2) {
     for (let i = 1; i < 4; i++) {
       arr.push(findElement(row1, i));
       if (arr[i] !== undefined) return false;
-      if (checkFor(arr[i].color, activePieces, row1, i)) {
+      if (checkFor(arr[0].color, activePieces, row1, i)) {
         return false;
       }
     }
@@ -411,6 +411,12 @@ function unhighlightSquare(row1, col1) {
   } else {
     activatedHTML.style.backgroundImage = backgroundDark;
   }
+}
+
+function highlightSquare(squareId) {
+  const activatedHTML = document.getElementById(squareId);
+  activatedHTML.style.backgroundImage = "none";
+  activatedHTML.style.backgroundColor = colorYellow;
 }
 
 function checkFor(color, arr, row = undefined, col = undefined) {
@@ -558,6 +564,10 @@ let isValidMove = false;
 let inCheck = false;
 let inCheckNext = false;
 
+// array to store captured pieces
+const capturedWhite = [];
+const capturedBlack = [];
+
 // querySelector
 const logDisplay = document.getElementById("log");
 
@@ -599,6 +609,7 @@ function gamePlay(e) {
           (state === 3 && activatedPiece.color === "black")
         ) {
           logDisplay.innerText = `${activatedPiece.type} at ${activatedPieceRow},${activatedPieceCol} is selected`;
+          highlightSquare(activatedPieceSquare);
           stateIncrement();
         } else {
           logDisplay.innerText = "wrong color is selected";
@@ -653,6 +664,7 @@ function gamePlay(e) {
       // same square
       if (isSameSquare) {
         logDisplay.innerText = "cancelled";
+        unhighlightSquare(activatedPieceRow, activatedPieceCol);
         state--;
       }
       // different square
@@ -661,13 +673,22 @@ function gamePlay(e) {
         if (!isSameColor && isValidMove) {
           if (!inCheck && inCheckNext) {
             logDisplay.innerText = "invalid move - king is moved into check";
+            state--;
+            unhighlightSquare(activatedPieceRow, activatedPieceCol);
           } else if (inCheck && inCheckNext) {
             logDisplay.innerText = "invalid move - king is still in check";
+            state--;
+            unhighlightSquare(activatedPieceRow, activatedPieceCol);
           } else {
             logDisplay.innerText = `moved`;
             activePieces[activePieceIndex].position = [targetRow, targetCol];
+            unhighlightSquare(activatedPieceRow, activatedPieceCol);
             if (isOccupied) {
-              console.log(activePieces.splice(capturedPieceIndex, 1));
+              if (activePieces[capturedPieceIndex].color === "white") {
+                capturedWhite.push(activePieces.splice(capturedPieceIndex, 1));
+              } else {
+                capturedBlack.push(activePieces.splice(capturedPieceIndex, 1));
+              }
 
               logDisplay.innerText = `captured`;
             }
@@ -690,6 +711,7 @@ function gamePlay(e) {
           }
         } else {
           logDisplay.innerText = "invalid move";
+          unhighlightSquare(activatedPieceRow, activatedPieceCol);
           state--;
         }
       }
