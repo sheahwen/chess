@@ -8,6 +8,7 @@
     <title>Chess</title>
   </head>
   <body>
+    <div id="container">
     <div id="board">
       <div class="row" id="row7">
         <div class="square" id="r7c0">&#9820</div>
@@ -89,11 +90,24 @@
         <div class="square" id="r0c6">&#9816</div>
         <div class="square" id="r0c7">&#9814</div>
       </div>
-      </div>
     </div> 
+
+    <div class=capturedContainer>
+      <div class=capturedBox id=capturedBoxBlack>
+        <h3>Black captured pieces</h3>
+        <p class=capturedText id="capturedBlackDisplay">pppppppppppppppppppppppppp</p>
+      </div>
+      <div class=capturedBox id=capturedBoxWhite>
+        <h3>White captured pieces</h3>
+        <p class=capturedText id="capturedWhiteDisplay">PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP</p>
+      </div>
+    </div>
+
     <div id="log">
       <button>Start</button>
     </div>
+
+  </div>
     <script src="bughouse.js" charset="utf-8"></script>
   </body>
 </html>
