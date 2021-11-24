@@ -1,7 +1,7 @@
 #both {
-  width: 1600px;
+  width: 1400px;
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
 }
 
 .square {
@@ -42,18 +42,27 @@
 
 .capturedBox {
   width: 160px;
+  display: flex;
+  flex-wrap: wrap;
   overflow-wrap: break-word;
   padding: 5px;
   box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
-  text-align: left;
 }
 
 .capturedText {
   font-size: 25px;
 }
 
+.gg {
+  width: 40px;
+  text-align: center;
+  font-size: 30px;
+  cursor: pointer;
+}
+
 h3 {
   font-size: 12px;
+  width: 160px;
   text-align: center;
 }
 

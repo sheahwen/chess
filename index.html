@@ -8,7 +8,7 @@
     <title>Chess</title>
   </head>
   <body>
-  <div id=both>=
+  <div id=both>
     <div class="container" id=containerLeft>
     <div class="board" id="boardLeft">
       <div class="row" id="row7">
@@ -93,13 +93,14 @@
       </div>
     </div> 
 
-    <div class=capturedContainer>
-      <div class=capturedBox id=capturedBoxBlack>
+    <div class=capturedContainer id = capturedContainerLeft>
+      <div class=capturedBox id=capturedBoxBlackLeft>
         <h3>Black captured pieces</h3>
         <p class=capturedText id="capturedblackDisplayLeft"></p>
       </div>
-      <div class=capturedBox id=capturedBoxWhite>
+      <div class=capturedBox id=capturedBoxWhiteLeft>
         <h3>White captured pieces</h3>
+        <!-- <div class=gg id="ggPiece">&#9814</div> -->
         <p class=capturedText id="capturedwhiteDisplayLeft"></p>
       </div>
     </div>
@@ -112,7 +113,7 @@
 
   <div class="container" id=containerRight>
 
-    <div class=capturedContainer>
+    <div class=capturedContainer id=capturedContainerRight>
       <div class=capturedBox id=capturedBoxBlackRight>
         <h3>Black captured pieces</h3>
         <p class=capturedText id="capturedblackDisplayRight"></p>
@@ -122,7 +123,7 @@
         <p class=capturedText id="capturedwhiteDisplayRight"></p>
       </div>
     </div>
-    
+
     <div class = "board" id="boardRight">
       <div class="row" id="ROW7">
         <div class="square" id="R7C0">&#9820</div>

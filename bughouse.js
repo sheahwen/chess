@@ -10,7 +10,7 @@ const colorYellow = "yellow";
 
 for (let i = 0; i < 8; i++) {
   for (let j = 0; j < 8; j++) {
-    if ((i + j) % 2 === 0) {
+    if ((i + j) % 2 !== 0) {
       const thisSquareLeft = document.getElementById(`r${i}c${j}`);
       const thisSquareRight = document.getElementById(`R${i}C${j}`);
       thisSquareLeft.style.backgroundImage = backgroundLight;
@@ -464,6 +464,12 @@ const logDisplayRight = document.getElementById("logRight");
 // =>  for fun
 const emoji = ["&#x1f622", "&#x1f44f"];
 
+// piece recycled from captured tray
+let invPieceLeft = "";
+let invPieceLeftId = "";
+let invPieceRight = "";
+let invPieceRightId = "";
+
 // ------------ function declarations
 
 function updateHTML(row1, col1, row2, col2, board) {
@@ -491,7 +497,7 @@ function unhighlightSquare(row1, col1, board) {
     activatedHTML = document.getElementById(`R${row1}C${col1}`);
   }
 
-  if ((row1 + col1) % 2 === 0) {
+  if ((row1 + col1) % 2 !== 0) {
     activatedHTML.style.backgroundImage = backgroundLight;
   } else {
     activatedHTML.style.backgroundImage = backgroundDark;
@@ -505,8 +511,30 @@ function highlightSquare(squareId) {
 }
 
 function addCaptured(color, id, board) {
-  const box = document.getElementById(`captured${color}Display${board}`);
-  box.innerHTML += document.getElementById(id).innerHTML;
+  let length = 0;
+
+  const div = document.getElementById(`capturedBox${color}${board}`);
+  const newDiv = document.createElement("div");
+  newDiv.className = "gg";
+
+  // determine ID number
+
+  if (color === "White" && id[0] === "r") {
+    length = capturedWhiteLeft.length - 1;
+  } else if (color === "Black" && id[0] === "r") {
+    length = capturedBlackLeft.length - 1;
+  } else if (color === "White" && id[0] === "R") {
+    length = capturedWhiteRight.length - 1;
+  } else if (color === "Black" && id[0] === "R") {
+    length = capturedBlackRight.length - 1;
+  }
+
+  const colorVar = color[0].toUpperCase();
+  const boardVar = board[0].toUpperCase();
+
+  newDiv.id = `gg${colorVar}${boardVar}${length}`;
+  newDiv.innerHTML = document.getElementById(id).innerHTML;
+  div.append(newDiv);
 }
 
 function checkFor(color, arr, row = undefined, col = undefined) {
@@ -632,6 +660,13 @@ function findElement(row, col, arr) {
   return arr.find(({ position }) => position[0] === row && position[1] === col);
 }
 
+function updateIndex(color, board, index, arr) {
+  for (let i = index; i < arr.length; i++) {
+    const div = document.getElementById(`gg${color}${board}${i + 1}`);
+    div.id = `gg${color}${board}${i}`;
+  }
+}
+
 // ------------ upon clicking the start button
 function startFunction() {
   document.querySelector("button").remove();
@@ -645,38 +680,97 @@ function startFunction() {
 
 // ------------- main function
 
+function recyclingFunction(e) {
+  if (e.target.className === "gg") {
+    const divID = e.target.id;
+    const color = divID[2]; // W / B
+    let board = divID[3]; // L / R
+
+    const invIndex = Number(divID.slice(4));
+
+    if (stateRight === 1 && color === "W" && board === "L") {
+      invPieceRight = capturedWhiteLeft[invIndex];
+      invPieceRightId = divID;
+      document.getElementById(invPieceRightId).style.backgroundColor =
+        colorYellow;
+      stateIncrement("right");
+    } else if (stateRight === 3 && color === "B" && board === "L") {
+      invPieceRight = capturedBlackLeft[invIndex];
+      invPieceRightId = divID;
+      document.getElementById(invPieceRightId).style.backgroundColor =
+        colorYellow;
+      stateIncrement("right");
+    } else if (stateLeft === 1 && color === "W" && board === "R") {
+      console.log("captured piece clicked");
+      invPieceLeft = capturedWhiteRight[invIndex];
+      invPieceLeftId = divID;
+      document.getElementById(invPieceLeftId).style.backgroundColor =
+        colorYellow;
+      stateIncrement("left");
+    } else if (stateLeft === 3 && color === "B" && board === "R") {
+      invPieceLeft = capturedBlackRight[invIndex];
+      invPieceLeftId = divID;
+      document.getElementById(invPieceLeftId).style.backgroundColor =
+        colorYellow;
+      stateIncrement("left");
+    } else if (
+      (stateLeft === 2 && color === "W" && board === "R") ||
+      (stateLeft === 4 && color === "B" && board === "R")
+    ) {
+      document.getElementById(invPieceLeftId).style.backgroundColor =
+        "transparent";
+      invPieceLeft = "";
+      invPieceLeftId = "";
+      logDisplayLeft.innerText = "Cancelled";
+      stateLeft--;
+    } else if (
+      (stateRight === 2 && color === "W" && board === "L") ||
+      (stateRight === 4 && color === "B" && board === "L")
+    ) {
+      document.getElementById(invPieceRightId).style.backgroundColor =
+        "transparent";
+      invPieceRight = "";
+      invPieceRightId = "";
+      stateRight--;
+      logDisplayRight.innerText = "Cancelled";
+    } else return;
+  } else return;
+}
+
 function gamePlayLeft(e) {
   if (e.target.className === "square") {
     if (stateLeft === 1 || stateLeft === 3) {
       //first click
 
-      activatedPieceSquareLeft = e.target.id;
-      activatedPieceRowLeft = Number(activatedPieceSquareLeft[1]);
-      activatedPieceColLeft = Number(activatedPieceSquareLeft[3]);
+      if (invPieceLeft === "") {
+        activatedPieceSquareLeft = e.target.id;
+        activatedPieceRowLeft = Number(activatedPieceSquareLeft[1]);
+        activatedPieceColLeft = Number(activatedPieceSquareLeft[3]);
 
-      activatedPieceLeft = findElement(
-        activatedPieceRowLeft,
-        activatedPieceColLeft,
-        activePiecesLeft
-      );
-      activePieceIndexLeft = activePiecesLeft.indexOf(activatedPieceLeft);
+        activatedPieceLeft = findElement(
+          activatedPieceRowLeft,
+          activatedPieceColLeft,
+          activePiecesLeft
+        );
+        activePieceIndexLeft = activePiecesLeft.indexOf(activatedPieceLeft);
 
-      // if empty square
-      if (activatedPieceLeft === undefined) {
-        logDisplayLeft.innerText = "empty square selected";
-      }
+        // if empty square
+        if (activatedPieceLeft === undefined) {
+          logDisplayLeft.innerText = "empty square selected";
+        }
 
-      // if not empty square => check for color ~~~ proceed
-      else {
-        if (
-          (stateLeft === 1 && activatedPieceLeft.color === "white") ||
-          (stateLeft === 3 && activatedPieceLeft.color === "black")
-        ) {
-          logDisplayLeft.innerText = `${activatedPieceLeft.type} at ${activatedPieceRowLeft},${activatedPieceColLeft} is selected`;
-          highlightSquare(activatedPieceSquareLeft, activePiecesLeft, "left");
-          stateIncrement("left");
-        } else {
-          logDisplayLeft.innerText = "wrong color is selected";
+        // if not empty square => check for color ~~~ proceed
+        else {
+          if (
+            (stateLeft === 1 && activatedPieceLeft.color === "white") ||
+            (stateLeft === 3 && activatedPieceLeft.color === "black")
+          ) {
+            logDisplayLeft.innerText = `${activatedPieceLeft.type} at ${activatedPieceRowLeft},${activatedPieceColLeft} is selected`;
+            highlightSquare(activatedPieceSquareLeft, activePiecesLeft, "left");
+            stateIncrement("left");
+          } else {
+            logDisplayLeft.innerText = "wrong color is selected";
+          }
         }
       }
     } else if (stateLeft === 2 || stateLeft === 4) {
@@ -687,139 +781,70 @@ function gamePlayLeft(e) {
       const targetCol = Number(targetSquare[3]);
 
       const targetPiece = findElement(targetRow, targetCol, activePiecesLeft);
-
-      let capturedPieceIndex = -1;
-      if (targetPiece !== undefined) {
-        capturedPieceIndex = activePiecesLeft.indexOf(targetPiece);
-      }
-
-      const isSameSquare = activatedPieceSquareLeft === targetSquare;
       const isOccupied = targetPiece !== undefined;
-      const isSameColor =
-        isOccupied && targetPiece.color === activatedPieceLeft.color;
-      let isValidMove = false;
-      let inCheck = false;
-      let inCheckNext = false;
+      let capturedPieceIndex = -1;
 
-      // not run if targeting pieces of the same color
-      if (!isSameColor) {
-        if (stateLeft === 2) {
-          const inCheck = checkFor("white", activePiecesLeft);
-          const inCheckNext = nextMoveCheck(
-            "white",
-            isOccupied,
-            activePiecesLeft,
-            "left",
-            targetRow,
-            targetCol,
-            capturedPieceIndex
-          );
-        } else {
-          inCheck = checkFor("black", activePiecesLeft);
-          inCheckNext = nextMoveCheck(
-            "black",
-            isOccupied,
-            activePiecesLeft,
-            "left",
-            targetRow,
-            targetCol,
-            capturedPieceIndex
-          );
+      if (invPieceLeft === "") {
+        capturedPieceIndex = -1;
+        if (targetPiece !== undefined) {
+          capturedPieceIndex = activePiecesLeft.indexOf(targetPiece);
         }
-      } else {
-        inCheck = false;
-        inCheckNext = false;
-      }
 
-      if (activatedPieceLeft.type === "pawn" && isOccupied & !isSameColor) {
-        isValidMove = activatedPieceLeft.checkCaptureMove(
-          targetRow,
-          targetCol,
-          activePiecesLeft
-        );
-      } else {
-        isValidMove = activatedPieceLeft.checkValidMove(
-          targetRow,
-          targetCol,
-          activePiecesLeft,
-          "left"
-        );
-      }
+        const isSameSquare = activatedPieceSquareLeft === targetSquare;
+        const isSameColor =
+          isOccupied && targetPiece.color === activatedPieceLeft.color;
+        let isValidMove = false;
+        let inCheck = false;
+        let inCheckNext = false;
 
-      // same square
-      if (isSameSquare) {
-        logDisplayLeft.innerText = "cancelled";
-        unhighlightSquare(activatedPieceRowLeft, activatedPieceColLeft, "left");
-        stateLeft--;
-      }
-      // different square
-      else {
-        // different square => if valid move or color is different
-        if (!isSameColor && isValidMove) {
-          if (!inCheck && inCheckNext) {
-            logDisplayLeft.innerText =
-              "invalid move - king is moved into check";
-            stateLeft--;
-            unhighlightSquare(
-              activatedPieceRowLeft,
-              activatedPieceColLeft,
-              "left"
-            );
-          } else if (inCheck && inCheckNext) {
-            logDisplayLeft.innerText = "invalid move - king is still in check";
-            stateLeft--;
-            unhighlightSquare(
-              activatedPieceRowLeft,
-              activatedPieceColLeft,
-              "left"
+        // not run if targeting pieces of the same color
+        if (!isSameColor) {
+          if (stateLeft === 2) {
+            inCheck = checkFor("white", activePiecesLeft);
+            inCheckNext = nextMoveCheck(
+              "white",
+              isOccupied,
+              activePiecesLeft,
+              "left",
+              targetRow,
+              targetCol,
+              capturedPieceIndex
             );
           } else {
-            logDisplayLeft.innerText = `moved`;
-            activePiecesLeft[activePieceIndexLeft].position = [
+            inCheck = checkFor("black", activePiecesLeft);
+            inCheckNext = nextMoveCheck(
+              "black",
+              isOccupied,
+              activePiecesLeft,
+              "left",
               targetRow,
               targetCol,
-            ];
-            unhighlightSquare(
-              activatedPieceRowLeft,
-              activatedPieceColLeft,
-              "left"
-            );
-            if (isOccupied) {
-              if (activePiecesLeft[capturedPieceIndex].color === "white") {
-                capturedWhiteLeft.push(
-                  activePiecesLeft.splice(capturedPieceIndex, 1)
-                );
-                addCaptured("white", targetSquare, "Left");
-              } else {
-                capturedBlackLeft.push(
-                  activePiecesLeft.splice(capturedPieceIndex, 1)
-                );
-                addCaptured("black", targetSquare, "Left");
-              }
-
-              const temp = Math.floor(Math.random() * 2);
-              logDisplayLeft.innerHTML = `captured ${emoji[temp]}`;
-            }
-
-            if (activatedPieceLeft.type === "pawn") {
-              activatedPieceLeft.isNew = false;
-            } else if (activatedPieceLeft.type === "rook") {
-              activatedPieceLeft.isNew = false;
-            } else if (activatedPieceLeft.type === "king") {
-              activatedPieceLeft.isNew = false;
-            }
-
-            stateIncrement("left");
-            updateHTML(
-              activatedPieceRowLeft,
-              activatedPieceColLeft,
-              targetRow,
-              targetCol,
-              "left"
+              capturedPieceIndex
             );
           }
         } else {
-          logDisplayLeft.innerText = "invalid move";
+          inCheck = false;
+          inCheckNext = false;
+        }
+
+        if (activatedPieceLeft.type === "pawn" && isOccupied & !isSameColor) {
+          isValidMove = activatedPieceLeft.checkCaptureMove(
+            targetRow,
+            targetCol,
+            activePiecesLeft
+          );
+        } else {
+          isValidMove = activatedPieceLeft.checkValidMove(
+            targetRow,
+            targetCol,
+            activePiecesLeft,
+            "left"
+          );
+        }
+
+        // same square
+        if (isSameSquare) {
+          logDisplayLeft.innerText = "cancelled";
           unhighlightSquare(
             activatedPieceRowLeft,
             activatedPieceColLeft,
@@ -827,9 +852,121 @@ function gamePlayLeft(e) {
           );
           stateLeft--;
         }
+        // different square
+        else {
+          // different square => if valid move or color is different
+          if (!isSameColor && isValidMove) {
+            if (!inCheck && inCheckNext) {
+              logDisplayLeft.innerText =
+                "invalid move - king is moved into check";
+              stateLeft--;
+              unhighlightSquare(
+                activatedPieceRowLeft,
+                activatedPieceColLeft,
+                "left"
+              );
+            } else if (inCheck && inCheckNext) {
+              logDisplayLeft.innerText =
+                "invalid move - king is still in check";
+              stateLeft--;
+              unhighlightSquare(
+                activatedPieceRowLeft,
+                activatedPieceColLeft,
+                "left"
+              );
+            } else {
+              logDisplayLeft.innerText = `moved`;
+              activePiecesLeft[activePieceIndexLeft].position = [
+                targetRow,
+                targetCol,
+              ];
+              unhighlightSquare(
+                activatedPieceRowLeft,
+                activatedPieceColLeft,
+                "left"
+              );
+              if (isOccupied) {
+                if (activePiecesLeft[capturedPieceIndex].color === "white") {
+                  capturedWhiteLeft.push(
+                    activePiecesLeft.splice(capturedPieceIndex, 1)[0]
+                  );
+                  addCaptured("White", targetSquare, "Left");
+                } else {
+                  capturedBlackLeft.push(
+                    activePiecesLeft.splice(capturedPieceIndex, 1)[0]
+                  );
+
+                  addCaptured("Black", targetSquare, "Left");
+                }
+
+                const temp = Math.floor(Math.random() * 2);
+                logDisplayLeft.innerHTML = `captured ${emoji[temp]}`;
+              }
+
+              if (activatedPieceLeft.type === "pawn") {
+                activatedPieceLeft.isNew = false;
+              } else if (activatedPieceLeft.type === "rook") {
+                activatedPieceLeft.isNew = false;
+              } else if (activatedPieceLeft.type === "king") {
+                activatedPieceLeft.isNew = false;
+              }
+
+              stateIncrement("left");
+              updateHTML(
+                activatedPieceRowLeft,
+                activatedPieceColLeft,
+                targetRow,
+                targetCol,
+                "left"
+              );
+            }
+          } else {
+            logDisplayLeft.innerText = "invalid move";
+            unhighlightSquare(
+              activatedPieceRowLeft,
+              activatedPieceColLeft,
+              "left"
+            );
+            stateLeft--;
+          }
+        }
+      } else {
+        // if invPiece is selected
+        if (!isOccupied) {
+          if (invPieceLeft.color === "white") {
+            //remove invPiece from captured stash
+            const index = capturedWhiteRight.indexOf(invPieceLeft);
+            capturedWhiteRight.splice(index, 1);
+
+            updateIndex("W", "R", index, capturedWhiteRight);
+          } else {
+            const index = capturedBlackRight.indexOf(invPieceLeft);
+            capturedBlackRight.splice(index, 1);
+
+            updateIndex("B", "R", index, capturedBlackRight);
+          }
+
+          //update target square symbol and remove the symbol from stash
+          document.getElementById(targetSquare).innerHTML =
+            document.getElementById(invPieceLeftId).innerHTML;
+          document.getElementById(invPieceLeftId).remove();
+
+          // update invPiece position to new square
+          invPieceLeft.position = [targetRow, targetCol];
+          activePiecesLeft.push(invPieceLeft);
+
+          invPieceLeft = "";
+          invPieceLeftId = "";
+
+          stateIncrement("left");
+        } else {
+          invPieceLeft = "";
+          invPieceLeftId = "";
+          stateLeft--;
+        }
       }
     }
-    console.log(`current state is ${stateLeft}`);
+    console.log(`current left state is ${stateLeft}`);
   }
 }
 
@@ -880,142 +1017,69 @@ function gamePlayRight(e) {
 
       const targetPiece = findElement(targetRow, targetCol, activePiecesRight);
 
-      let capturedPieceIndex = -1;
-      if (targetPiece !== undefined) {
-        capturedPieceIndex = activePiecesRight.indexOf(targetPiece);
-      }
-
-      const isSameSquare = activatedPieceSquareRight === targetSquare;
       const isOccupied = targetPiece !== undefined;
-      const isSameColor =
-        isOccupied && targetPiece.color === activatedPieceRight.color;
-      let isValidMove = false;
       let inCheck = false;
       let inCheckNext = false;
+      let capturedPieceIndex = -1;
 
-      // not run if targeting pieces of the same color
-      if (!isSameColor) {
-        if (stateRight === 2) {
-          const inCheck = checkFor("white", activePiecesRight);
-          const inCheckNext = nextMoveCheck(
-            "white",
-            isOccupied,
-            activePiecesRight,
-            "right",
-            targetRow,
-            targetCol,
-            capturedPieceIndex
-          );
-        } else {
-          inCheck = checkFor("black", activePiecesRight);
-          inCheckNext = nextMoveCheck(
-            "black",
-            isOccupied,
-            activePiecesRight,
-            "right",
-            targetRow,
-            targetCol,
-            capturedPieceIndex
-          );
+      if (invPieceRight === "") {
+        if (targetPiece !== undefined) {
+          capturedPieceIndex = activePiecesRight.indexOf(targetPiece);
         }
-      } else {
-        inCheck = false;
-        inCheckNext = false;
-      }
 
-      if (activatedPieceRight.type === "pawn" && isOccupied & !isSameColor) {
-        isValidMove = activatedPieceRight.checkCaptureMove(
-          targetRow,
-          targetCol,
-          activePiecesRight
-        );
-      } else {
-        isValidMove = activatedPieceRight.checkValidMove(
-          targetRow,
-          targetCol,
-          activePiecesRight,
-          "right"
-        );
-      }
+        let isValidMove = false;
+        const isSameSquare = activatedPieceSquareRight === targetSquare;
+        const isSameColor =
+          isOccupied && targetPiece.color === activatedPieceRight.color;
 
-      // same square
-      if (isSameSquare) {
-        logDisplayRight.innerText = "cancelled";
-        unhighlightSquare(
-          activatedPieceRowRight,
-          activatedPieceColRight,
-          "right"
-        );
-        stateRight--;
-      }
-      // different square
-      else {
-        // different square => if valid move or color is different
-        if (!isSameColor && isValidMove) {
-          if (!inCheck && inCheckNext) {
-            logDisplayRight.innerText =
-              "invalid move - king is moved into check";
-            stateRight--;
-            unhighlightSquare(
-              activatedPieceRowRight,
-              activatedPieceColRight,
-              "right"
-            );
-          } else if (inCheck && inCheckNext) {
-            logDisplayRight.innerText = "invalid move - king is still in check";
-            stateRight--;
-            unhighlightSquare(
-              activatedPieceRowRight,
-              activatedPieceColRight,
-              "right"
+        // not run if targeting pieces of the same color
+        if (!isSameColor) {
+          if (stateRight === 2) {
+            inCheck = checkFor("white", activePiecesRight);
+            inCheckNext = nextMoveCheck(
+              "white",
+              isOccupied,
+              activePiecesRight,
+              "right",
+              targetRow,
+              targetCol,
+              capturedPieceIndex
             );
           } else {
-            logDisplayRight.innerText = `moved`;
-            activePiecesRight[activePieceIndexRight].position = [
+            inCheck = checkFor("black", activePiecesRight);
+            inCheckNext = nextMoveCheck(
+              "black",
+              isOccupied,
+              activePiecesRight,
+              "right",
               targetRow,
               targetCol,
-            ];
-            unhighlightSquare(
-              activatedPieceRowRight,
-              activatedPieceColRight,
-              "right"
-            );
-            if (isOccupied) {
-              if (activePiecesRight[capturedPieceIndex].color === "white") {
-                capturedWhiteRight.push(
-                  activePiecesRight.splice(capturedPieceIndex, 1)
-                );
-                addCaptured("white", targetSquare, "Right");
-              } else {
-                capturedBlackRight.push(
-                  activePiecesRight.splice(capturedPieceIndex, 1)
-                );
-                addCaptured("black", targetSquare, "Right");
-              }
-
-              const temp = Math.floor(Math.random() * 2);
-              logDisplayRight.innerHTML = `captured ${emoji[temp]}`;
-            }
-
-            if (activatedPieceRight.type === "pawn") {
-              activatedPieceRight.isNew = false;
-            } else if (activatedPieceRight.type === "rook") {
-              activatedPieceRight.isNew = false;
-            } else if (activatedPieceRight.type === "king") {
-              activatedPieceRight.isNew = false;
-            }
-
-            stateIncrement("right");
-            updateHTML(
-              activatedPieceRowRight,
-              activatedPieceColRight,
-              targetRow,
-              targetCol,
-              "right"
+              capturedPieceIndex
             );
           }
         } else {
-          logDisplayRight.innerText = "invalid move";
+          inCheck = false;
+          inCheckNext = false;
+        }
+
+        if (activatedPieceRight.type === "pawn" && isOccupied & !isSameColor) {
+          isValidMove = activatedPieceRight.checkCaptureMove(
+            targetRow,
+            targetCol,
+            activePiecesRight
+          );
+        } else {
+          isValidMove = activatedPieceRight.checkValidMove(
+            targetRow,
+            targetCol,
+            activePiecesRight,
+            "right"
+          );
+        }
+
+        // same square
+        if (isSameSquare) {
+          logDisplayRight.innerText = "cancelled";
           unhighlightSquare(
             activatedPieceRowRight,
             activatedPieceColRight,
@@ -1023,10 +1087,129 @@ function gamePlayRight(e) {
           );
           stateRight--;
         }
+        // different square
+        else {
+          // different square => if valid move or color is different
+          if (!isSameColor && isValidMove) {
+            if (!inCheck && inCheckNext) {
+              logDisplayRight.innerText =
+                "invalid move - king is moved into check";
+              stateRight--;
+              unhighlightSquare(
+                activatedPieceRowRight,
+                activatedPieceColRight,
+                "right"
+              );
+            } else if (inCheck && inCheckNext) {
+              logDisplayRight.innerText =
+                "invalid move - king is still in check";
+              stateRight--;
+              unhighlightSquare(
+                activatedPieceRowRight,
+                activatedPieceColRight,
+                "right"
+              );
+            } else {
+              logDisplayRight.innerText = `moved`;
+              activePiecesRight[activePieceIndexRight].position = [
+                targetRow,
+                targetCol,
+              ];
+              unhighlightSquare(
+                activatedPieceRowRight,
+                activatedPieceColRight,
+                "right"
+              );
+              if (isOccupied) {
+                if (activePiecesRight[capturedPieceIndex].color === "white") {
+                  capturedWhiteRight.push(
+                    activePiecesRight.splice(capturedPieceIndex, 1)[0]
+                  );
+                  addCaptured("White", targetSquare, "Right");
+                } else {
+                  capturedBlackRight.push(
+                    activePiecesRight.splice(capturedPieceIndex, 1)[0]
+                  );
+
+                  addCaptured("Black", targetSquare, "Right");
+                }
+
+                const temp = Math.floor(Math.random() * 2);
+                logDisplayRight.innerHTML = `captured ${emoji[temp]}`;
+              }
+
+              if (activatedPieceRight.type === "pawn") {
+                activatedPieceRight.isNew = false;
+              } else if (activatedPieceRight.type === "rook") {
+                activatedPieceRight.isNew = false;
+              } else if (activatedPieceRight.type === "king") {
+                activatedPieceRight.isNew = false;
+              }
+
+              stateIncrement("right");
+              updateHTML(
+                activatedPieceRowRight,
+                activatedPieceColRight,
+                targetRow,
+                targetCol,
+                "right"
+              );
+            }
+          } else {
+            logDisplayRight.innerText = "invalid move";
+            unhighlightSquare(
+              activatedPieceRowRight,
+              activatedPieceColRight,
+              "right"
+            );
+            stateRight--;
+          }
+        }
+      } else {
+        console.log(invPieceRight);
+        // if invPiece is selected
+        if (!isOccupied) {
+          if (invPieceRight.color === "white") {
+            //remove invPiece from captured stash
+            const index = capturedWhiteLeft.indexOf(invPieceRight);
+            capturedWhiteLeft.splice(index, 1);
+            updateIndex("W", "L", index, capturedWhiteLeft);
+          } else {
+            const index = capturedBlackLeft.indexOf(invPieceRight);
+            capturedBlackLeft.splice(index, 1);
+            updateIndex("B", "L", index, capturedBlackLeft);
+          }
+
+          //update target square symbol
+          document.getElementById(targetSquare).innerHTML =
+            document.getElementById(invPieceRightId).innerHTML;
+          //remove the symbol from stash
+          document.getElementById(invPieceRightId).remove();
+          //update id of the remaining pieces
+
+          // update invPiece position to new square
+          invPieceRight.position = [targetRow, targetCol];
+          activePiecesRight.push(invPieceRight);
+
+          invPieceRight = "";
+          invPieceRightId = "";
+
+          stateIncrement("right");
+        } else {
+          invPieceRight = "";
+          invPieceRightId = "";
+          stateRight--;
+        }
       }
     }
-    console.log(`current state is ${stateRight}`);
+    console.log(`current right state is ${stateRight}`);
   }
 }
 
 document.querySelector("button").addEventListener("click", startFunction);
+document
+  .querySelector("#capturedContainerLeft")
+  .addEventListener("click", recyclingFunction);
+document
+  .querySelector("#capturedContainerRight")
+  .addEventListener("click", recyclingFunction);
