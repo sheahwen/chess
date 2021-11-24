@@ -21,15 +21,11 @@ for (let i = 0; i < 8; i++) {
 }
 
 //common function
-function checkInBetween(axis, row1, col1, row2, col2) {
+function checkInBetween(axis, row1, col1, row2, col2, arr) {
   switch (axis) {
     case "row": {
       for (let i = Math.min(row1, row2) + 1; i < Math.max(row1, row2); i++) {
-        if (
-          activePieces.find(
-            ({ position }) => position[0] === i && position[1] === col1
-          ) !== undefined
-        ) {
+        if (findElement(i, col1, arr) !== undefined) {
           console.log("blocked");
           return false;
         }
@@ -39,7 +35,7 @@ function checkInBetween(axis, row1, col1, row2, col2) {
     case "column": {
       for (let i = Math.min(col1, col2) + 1; i < Math.max(col1, col2); i++) {
         if (
-          activePieces.find(
+          arr.find(
             ({ position }) => position[0] === row1 && position[1] === i
           ) !== undefined
         ) {
@@ -56,7 +52,7 @@ function checkInBetween(axis, row1, col1, row2, col2) {
       while (step > 0) {
         if (row1 > row2 && col1 > col2) {
           if (
-            activePieces.find(
+            arr.find(
               ({ position }) =>
                 position[0] === row1 - step && position[1] === col1 - step
             ) !== undefined
@@ -65,7 +61,7 @@ function checkInBetween(axis, row1, col1, row2, col2) {
           }
         } else if (row1 < row2 && col1 < col2) {
           if (
-            activePieces.find(
+            arr.find(
               ({ position }) =>
                 position[0] === row1 + step && position[1] === col1 + step
             ) !== undefined
@@ -74,7 +70,7 @@ function checkInBetween(axis, row1, col1, row2, col2) {
           }
         } else if (row1 > row2 && col1 < col2) {
           if (
-            activePieces.find(
+            arr.find(
               ({ position }) =>
                 position[0] === row1 - step && position[1] === col1 + step
             ) !== undefined
@@ -83,7 +79,7 @@ function checkInBetween(axis, row1, col1, row2, col2) {
           }
         } else if (row1 < row2 && col1 > col2) {
           if (
-            activePieces.find(
+            arr.find(
               ({ position }) =>
                 position[0] === row1 + step && position[1] === col1 - step
             ) !== undefined
@@ -107,7 +103,7 @@ class Pawn {
     this.position = position; // array[row, column]
     this.isNew = isNew;
   }
-  checkValidMove(row2, col2) {
+  checkValidMove(row2, col2, arr) {
     const row1 = this.position[0];
     const col1 = this.position[1];
 
@@ -118,7 +114,7 @@ class Pawn {
       if (
         this.isNew === true &&
         row1 + 2 === row2 &&
-        checkInBetween("row", row1, col1, row2, col2) === true
+        checkInBetween("row", row1, col1, row2, col2, arr) === true
       ) {
         return true;
       } else if (row1 + 1 === row2) {
@@ -130,7 +126,7 @@ class Pawn {
       if (
         this.isNew === true &&
         row2 + 2 === row1 &&
-        checkInBetween("row", row1, col1, row2, col2) === true
+        checkInBetween("row", row1, col1, row2, col2, arr) === true
       ) {
         return true;
       } else if (row2 + 1 === row1) {
@@ -164,18 +160,19 @@ class Rook {
     this.position = position; // array[row, column]
     this.isNew = isNew;
   }
-  checkValidMove(row2, col2) {
+  checkValidMove(row2, col2, arr) {
     const row1 = this.position[0];
     const col1 = this.position[1];
 
     if (row1 !== row2 && col1 !== col2) {
       return false;
     } else if (row1 == row2) {
-      if (checkInBetween("column", row1, col1, row2, col2) === false)
+      if (checkInBetween("column", row1, col1, row2, col2, arr) === false)
         return false;
       else return true;
     } else {
-      if (checkInBetween("row", row1, col1, row2, col2) === false) return false;
+      if (checkInBetween("row", row1, col1, row2, col2, arr) === false)
+        return false;
       // to review
       else return true;
     }
@@ -209,14 +206,14 @@ class Bishop {
     this.color = color;
     this.position = position; // array[row, column]
   }
-  checkValidMove(row2, col2) {
+  checkValidMove(row2, col2, arr) {
     //to add capture
     const row1 = this.position[0];
     const col1 = this.position[1];
 
     if (
       Math.abs(row2 - row1) === Math.abs(col2 - col1) &&
-      checkInBetween("diagonal", row1, col1, row2, col2) === true
+      checkInBetween("diagonal", row1, col1, row2, col2, arr) === true
     ) {
       return true;
     } else return false;
@@ -230,24 +227,24 @@ class Queen {
     this.color = color;
     this.position = position; // array[row, column]
   }
-  checkValidMove(row2, col2) {
+  checkValidMove(row2, col2, arr) {
     //to add capture
     const row1 = this.position[0];
     const col1 = this.position[1];
 
     if (
       Math.abs(row2 - row1) === Math.abs(col2 - col1) &&
-      checkInBetween("diagonal", row1, col1, row2, col2) === true
+      checkInBetween("diagonal", row1, col1, row2, col2, arr) === true
     ) {
       return true;
     } else if (
       row1 === row2 &&
-      checkInBetween("column", row1, col1, row2, col2) === true
+      checkInBetween("column", row1, col1, row2, col2, arr) === true
     ) {
       return true;
     } else if (
       col1 === col2 &&
-      checkInBetween("row", row1, col1, row2, col2) === true
+      checkInBetween("row", row1, col1, row2, col2, arr) === true
     ) {
       return true;
     } else return false;
@@ -263,7 +260,7 @@ class King {
     this.isNew = isNew;
   }
 
-  checkValidMove(row2, col2) {
+  checkValidMove(row2, col2, arr, board) {
     const row1 = this.position[0];
     const col1 = this.position[1];
 
@@ -272,10 +269,8 @@ class King {
       Math.abs(row2 - row1) === Math.abs(col2 - col1) &&
       Math.abs(row2 - row1) === 1
     ) {
-      console.log("Hi");
       return true;
     } else if (Math.abs(row1 - row2) + Math.abs(col1 - col2) === 1) {
-      console.log("Hi");
       return true;
     } else if (
       (row1 === 0 &&
@@ -303,59 +298,73 @@ class King {
         this.color === "black" &&
         this.isNew)
     ) {
-      console.log(`${row1}, ${col1},${row2},${col2}`);
-      return castling(row1, col1, row2, col2);
+      return castling(row1, col1, row2, col2, arr, board);
     } else return false;
   }
 }
 
 //----------------castling function
-function castling(row1, col1, row2, col2) {
+function castling(row1, col1, row2, col2, arr, board) {
   if (col2 === 2) {
-    console.log("lol");
-    const arr = [];
-    arr.push(findElement(row1, 0));
+    const arrLoop = [];
+    arrLoop.push(findElement(row1, 0, arr));
     for (let i = 1; i < 4; i++) {
-      arr.push(findElement(row1, i));
-      if (arr[i] !== undefined) return false;
-      if (checkFor(arr[0].color, activePieces, row1, i)) {
+      arrLoop.push(findElement(row1, i, arr));
+      if (arrLoop[i] !== undefined) return false;
+      if (checkFor(arrLoop[0].color, arr, row1, i)) {
         return false;
       }
     }
     if (row1 === 0) {
-      if (arr[0].type === "rook" && arr[0].color === "white" && arr[0].isNew) {
-        arr[0].position = [row1, 3];
-        updateHTML(row1, 0, row2, 3);
+      if (
+        arrLoop[0].type === "rook" &&
+        arrLoop[0].color === "white" &&
+        arrLoop[0].isNew
+      ) {
+        arrLoop[0].position = [row1, 3];
+        updateHTML(row1, 0, row2, 3, board);
         return true;
       } else return false;
     } else {
-      if (arr[0].type === "rook" && arr[0].color === "black" && arr[0].isNew) {
-        arr[0].position = [row1, 3];
-        updateHTML(row1, 0, row2, 3);
+      if (
+        arrLoop[0].type === "rook" &&
+        arrLoop[0].color === "black" &&
+        arrLoop[0].isNew
+      ) {
+        arrLoop[0].position = [row1, 3];
+        updateHTML(row1, 0, row2, 3, board);
         return true;
       } else return false;
     }
   } else {
-    const arr = [];
-    arr.push(findElement(row1, 7));
+    const arrLoop = [];
+    arrLoop.push(findElement(row1, 7, arr));
     for (let i = 6; i > 4; i--) {
-      arr.push(findElement(row1, i));
-      if (arr[i] !== undefined) return false;
-      if (checkFor(arr[0].color, activePieces, row1, i)) {
+      arrLoop.push(findElement(row1, i, arr));
+      if (arrLoop[i] !== undefined) return false;
+      if (checkFor(arrLoop[0].color, arr, row1, i)) {
         return false;
       }
     }
 
     if (row1 === 0) {
-      if (arr[0].type === "rook" && arr[0].color === "white" && arr[0].isNew) {
-        arr[0].position = [row1, 5];
-        updateHTML(row1, 7, row2, 5);
+      if (
+        arrLoop[0].type === "rook" &&
+        arrLoop[0].color === "white" &&
+        arrLoop[0].isNew
+      ) {
+        arrLoop[0].position = [row1, 5];
+        updateHTML(row1, 7, row2, 5, board);
         return true;
       } else return false;
     } else {
-      if (arr[0].type === "rook" && arr[0].color === "black" && arr[0].isNew) {
-        arr[0].position = [row1, 5];
-        updateHTML(row1, 7, row2, 5);
+      if (
+        arrLoop[0].type === "rook" &&
+        arrLoop[0].color === "black" &&
+        arrLoop[0].isNew
+      ) {
+        arrLoop[0].position = [row1, 5];
+        updateHTML(row1, 7, row2, 5, board);
         return true;
       } else return false;
     }
@@ -363,48 +372,61 @@ function castling(row1, col1, row2, col2) {
 }
 //-------------creating pieces
 
-const activePieces = [];
+const activePiecesLeft = [];
 
 for (let i = 0; i < 8; i++) {
-  activePieces.push(new Pawn("pawn", "white", [1, i]));
+  activePiecesLeft.push(new Pawn("pawn", "white", [1, i]));
 }
 for (let i = 0; i < 8; i++) {
-  activePieces.push(new Pawn("pawn", "black", [6, i]));
+  activePiecesLeft.push(new Pawn("pawn", "black", [6, i]));
 }
 
-activePieces.push(new Rook("rook", "white", [0, 0]));
-activePieces.push(new Rook("rook", "white", [0, 7]));
-activePieces.push(new Rook("rook", "black", [7, 0]));
-activePieces.push(new Rook("rook", "black", [7, 7]));
-activePieces.push(new Knight("knight", "white", [0, 1]));
-activePieces.push(new Knight("knight", "white", [0, 6]));
-activePieces.push(new Knight("knight", "black", [7, 1]));
-activePieces.push(new Knight("knight", "black", [7, 6]));
-activePieces.push(new Bishop("bishop", "white", [0, 2]));
-activePieces.push(new Bishop("bishop", "white", [0, 5]));
-activePieces.push(new Bishop("bishop", "black", [7, 2]));
-activePieces.push(new Bishop("bishop", "black", [7, 5]));
-activePieces.push(new Queen("queen", "white", [0, 3]));
-activePieces.push(new Queen("queen", "black", [7, 3]));
-activePieces.push(new King("king", "white", [0, 4]));
-activePieces.push(new King("king", "black", [7, 4]));
+activePiecesLeft.push(new Rook("rook", "white", [0, 0]));
+activePiecesLeft.push(new Rook("rook", "white", [0, 7]));
+activePiecesLeft.push(new Rook("rook", "black", [7, 0]));
+activePiecesLeft.push(new Rook("rook", "black", [7, 7]));
+activePiecesLeft.push(new Knight("knight", "white", [0, 1]));
+activePiecesLeft.push(new Knight("knight", "white", [0, 6]));
+activePiecesLeft.push(new Knight("knight", "black", [7, 1]));
+activePiecesLeft.push(new Knight("knight", "black", [7, 6]));
+activePiecesLeft.push(new Bishop("bishop", "white", [0, 2]));
+activePiecesLeft.push(new Bishop("bishop", "white", [0, 5]));
+activePiecesLeft.push(new Bishop("bishop", "black", [7, 2]));
+activePiecesLeft.push(new Bishop("bishop", "black", [7, 5]));
+activePiecesLeft.push(new Queen("queen", "white", [0, 3]));
+activePiecesLeft.push(new Queen("queen", "black", [7, 3]));
+activePiecesLeft.push(new King("king", "white", [0, 4]));
+activePiecesLeft.push(new King("king", "black", [7, 4]));
 
-console.log(`activePieces array contains`);
-console.log(activePieces);
+console.log(`activePiecesLeft array contains`);
+console.log(activePiecesLeft);
 
 // ------------ function declarations
 
-function updateHTML(row1, col1, row2, col2) {
-  const originalHTML = document.getElementById(`r${row1}c${col1}`);
-  const destinationHTML = document.getElementById(`r${row2}c${col2}`);
+function updateHTML(row1, col1, row2, col2, board) {
+  let originalHTML = "";
+  let destinationHTML = "";
+
+  if (board === "left") {
+    originalHTML = document.getElementById(`r${row1}c${col1}`);
+    destinationHTML = document.getElementById(`r${row2}c${col2}`);
+  } else {
+    originalHTML = document.getElementById(`R${row1}C${col1}`);
+    destinationHTML = document.getElementById(`R${row2}C${col2}`);
+  }
 
   destinationHTML.innerHTML = originalHTML.innerHTML;
 
   originalHTML.innerHTML = "";
 }
 
-function unhighlightSquare(row1, col1) {
-  const activatedHTML = document.getElementById(`r${row1}c${col1}`);
+function unhighlightSquare(row1, col1, board) {
+  let activatedHTML = "";
+  if (board === "left") {
+    activatedHTML = document.getElementById(`r${row1}c${col1}`);
+  } else {
+    activatedHTML = document.getElementById(`R${row1}C${col1}`);
+  }
 
   if ((row1 + col1) % 2 === 0) {
     activatedHTML.style.backgroundImage = backgroundLight;
@@ -419,19 +441,19 @@ function highlightSquare(squareId) {
   activatedHTML.style.backgroundColor = colorYellow;
 }
 
-function addCaptured(color, id) {
-  const box = document.getElementById(`captured${color}Display`);
+function addCaptured(color, id, board) {
+  const box = document.getElementById(`captured${color}Display${board}`);
   box.innerHTML += document.getElementById(id).innerHTML;
 }
 
 function checkFor(color, arr, row = undefined, col = undefined) {
   // locating the kings
   if (row === undefined) {
-    let blackKing = activePieces.find(
+    let blackKing = arr.find(
       (piece) => piece.color === "black" && piece.type === "king"
     );
 
-    let whiteKing = activePieces.find(
+    let whiteKing = arr.find(
       (piece) => piece.color === "white" && piece.type === "king"
     );
 
@@ -448,8 +470,10 @@ function checkFor(color, arr, row = undefined, col = undefined) {
   if (color === "white") {
     for (const piece of arr.filter((piece) => piece.color === "black")) {
       if (
-        (piece.type !== "pawn" && piece.checkValidMove(row, col) === true) ||
-        (piece.type === "pawn" && piece.checkCaptureMove(row, col) === true)
+        (piece.type !== "pawn" &&
+          piece.checkValidMove(row, col, arr) === true) ||
+        (piece.type === "pawn" &&
+          piece.checkCaptureMove(row, col, arr) === true)
       ) {
         return true;
       }
@@ -461,8 +485,10 @@ function checkFor(color, arr, row = undefined, col = undefined) {
   if (color === "black") {
     for (const piece of arr.filter((piece) => piece.color === "white")) {
       if (
-        (piece.type !== "pawn" && piece.checkValidMove(row, col) === true) ||
-        (piece.type === "pawn" && piece.checkCaptureMove(row, col) === true)
+        (piece.type !== "pawn" &&
+          piece.checkValidMove(row, col, arr) === true) ||
+        (piece.type === "pawn" &&
+          piece.checkCaptureMove(row, col, arr) === true)
       ) {
         console.log("black king is in check");
         return true;
@@ -472,114 +498,131 @@ function checkFor(color, arr, row = undefined, col = undefined) {
   }
 }
 
-function nextMoveCheck(color, isCapture) {
+function nextMoveCheck(
+  color,
+  isCapture,
+  arr,
+  board,
+  targetRow,
+  targetCol,
+  capturedPieceIndex
+) {
   let removedPiece = "";
   let temp = false;
 
-  activePieces[activePieceIndex].position = [targetRow, targetCol];
+  let activePieceIndex = 0;
+  let activatedPieceRow = 0;
+  let activatedPieceCol = 0;
+
+  if (board === "left") {
+    activePieceIndex = activePieceIndexLeft;
+    activatedPieceRow = activatedPieceRowLeft;
+    activatedPieceCol = activatedPieceColLeft;
+  } else {
+    activePieceIndex = activePieceIndexRight;
+    activatedPieceRow = activatedPieceRowRight;
+    activatedPieceCol = activatedPieceColRight;
+  }
+
+  arr[activePieceIndex].position = [targetRow, targetCol];
 
   if (isCapture) {
-    removedPiece = activePieces.splice(capturedPieceIndex, 1);
+    removedPiece = arr.splice(capturedPieceIndex, 1);
   }
 
   if (color === "white") {
-    if (checkFor("white", activePieces)) {
+    if (checkFor("white", arr)) {
       temp = true;
     }
   }
 
   if (color === "black") {
-    if (checkFor("black", activePieces)) {
+    if (checkFor("black", arr)) {
       temp = true;
     }
   }
 
-  // console.log(removedPiece);
-  // console.log(temp);
-  // console.log(checkFor("white", activePieces));
-  // console.log(capturedPieceIndex);
-  // console.log(activatedPieceRow, activatedPieceCol);
-  // console.log(targetRow, targetCol);
-
   if (isCapture) {
-    activePieces.splice(capturedPieceIndex, 0, removedPiece[0]);
-    console.log("below is the piece put back");
-    console.log(activePieces[capturedPieceIndex]);
+    arr.splice(capturedPieceIndex, 0, removedPiece[0]);
   }
 
-  activePieces[activePieceIndex].position = [
-    activatedPieceRow,
-    activatedPieceCol,
-  ];
+  arr[activePieceIndex].position = [activatedPieceRow, activatedPieceCol];
 
   return temp;
 }
 
-function stateIncrement() {
-  state++;
-  if (state === 5) {
-    state = 1;
+function stateIncrement(board) {
+  if (board === "left") {
+    stateLeft++;
+    if (stateLeft === 5) {
+      stateLeft = 1;
+    }
+  } else {
+    stateRight++;
+    if (stateRight === 5) {
+      stateRight = 1;
+    }
   }
 }
 
-function findElement(row, col) {
-  return activePieces.find(
-    ({ position }) => position[0] === row && position[1] === col
-  );
+function findElement(row, col, arr) {
+  return arr.find(({ position }) => position[0] === row && position[1] === col);
 }
 
 // ----------------------- variable declaration
 
+// ==> Right board
+
 // states = ["activated_piece_white", "destination_square_white".... then black]
-let state = 1;
+let stateLeft = 1;
 
 // Activated piece, e.g. pawn_white_1
-let activatedPiece = "";
+let activatedPieceLeft = "";
 
 // Activated piece square aka first click square coordination
-let activatedPieceSquare = "";
+let activatedPieceSquareLeft = "";
 
 // row and column number of activated piece square
-let activatedPieceRow = 0;
-let activatedPieceCol = 0;
+let activatedPieceRowLeft = 0;
+let activatedPieceColLeft = 0;
 
 // index of the activated piece in the activePieces array
-let activePieceIndex = 0;
-
-// Target square aka second click square coordination
-let targetSquare = "";
-
-// Target square row and column
-let targetRow = 0;
-let targetCol = 0;
-
-// Target piece sitting on the target square
-let targetPiece = "";
-
-// Index of captured piece in active pieces array, to be removed when captured
-let capturedPieceIndex = 0;
-
-// Second state variables
-let isSameSquare = false;
-let isOccupied = false;
-let isSameColor = false;
-let isValidMove = false;
-
-// check variable
-let inCheck = false;
-let inCheckNext = false;
+let activePieceIndexLeft = 0;
 
 // array to store captured pieces
-const capturedWhite = [];
-const capturedBlack = [];
-let capturedWhiteString = "";
-let capturedBlackString = "";
+const capturedWhiteLeft = [];
+const capturedBlackLeft = [];
 
 // querySelector
-const logDisplay = document.getElementById("log");
+const logDisplayLeft = document.getElementById("log");
 
-// for fun
+// =>  for fun
 const emoji = ["&#x1f622", "&#x1f44f"];
+
+// ==> Right board
+
+// states = ["activated_piece_white", "destination_square_white".... then black]
+let stateRight = 1;
+
+// Activated piece, e.g. pawn_white_1
+let activatedPieceRight = "";
+
+// Activated piece square aka first click square coordination
+let activatedPieceSquareRight = "";
+
+// row and column number of activated piece square
+let activatedPieceRowRight = 0;
+let activatedPieceColRight = 0;
+
+// index of the activated piece in the activePieces array
+let activePieceIndexRight = 0;
+
+// array to store captured pieces
+const capturedWhiteRight = [];
+const capturedBlackRight = [];
+
+// querySelector
+const logDisplayRight = document.getElementById("log");
 
 // ------------ upon clicking the start button
 function startFunction() {
@@ -592,144 +635,189 @@ function startFunction() {
 
 function gamePlay(e) {
   if (e.target.className === "square") {
-    if (state === 1 || state === 3) {
+    if (stateLeft === 1 || stateLeft === 3) {
       //first click
 
-      activatedPieceSquare = e.target.id;
-      activatedPieceRow = Number(activatedPieceSquare[1]);
-      activatedPieceCol = Number(activatedPieceSquare[3]);
+      activatedPieceSquareLeft = e.target.id;
+      activatedPieceRowLeft = Number(activatedPieceSquareLeft[1]);
+      activatedPieceColLeft = Number(activatedPieceSquareLeft[3]);
 
-      activatedPiece = activePieces.find(
-        ({ position }) =>
-          position[0] === activatedPieceRow && position[1] === activatedPieceCol
+      activatedPieceLeft = findElement(
+        activatedPieceRowLeft,
+        activatedPieceColLeft,
+        activePiecesLeft
       );
-      activePieceIndex = activePieces.indexOf(activatedPiece);
-
-      console.log(activatedPiece);
+      activePieceIndexLeft = activePiecesLeft.indexOf(activatedPieceLeft);
 
       // if empty square
-      if (activatedPiece === undefined) {
-        logDisplay.innerText = "empty square selected";
+      if (activatedPieceLeft === undefined) {
+        logDisplayLeft.innerText = "empty square selected";
       }
 
       // if not empty square => check for color ~~~ proceed
       else {
         if (
-          (state === 1 && activatedPiece.color === "white") ||
-          (state === 3 && activatedPiece.color === "black")
+          (stateLeft === 1 && activatedPieceLeft.color === "white") ||
+          (stateLeft === 3 && activatedPieceLeft.color === "black")
         ) {
-          logDisplay.innerText = `${activatedPiece.type} at ${activatedPieceRow},${activatedPieceCol} is selected`;
-          highlightSquare(activatedPieceSquare);
-          stateIncrement();
+          logDisplayLeft.innerText = `${activatedPieceLeft.type} at ${activatedPieceRowLeft},${activatedPieceColLeft} is selected`;
+          highlightSquare(activatedPieceSquareLeft, activePiecesLeft, "left");
+          stateIncrement("left");
         } else {
-          logDisplay.innerText = "wrong color is selected";
+          logDisplayLeft.innerText = "wrong color is selected";
         }
       }
-    } else if (state === 2 || state === 4) {
+    } else if (stateLeft === 2 || stateLeft === 4) {
       //second click
 
-      targetSquare = e.target.id;
-      targetRow = Number(targetSquare[1]);
-      targetCol = Number(targetSquare[3]);
+      const targetSquare = e.target.id;
+      const targetRow = Number(targetSquare[1]);
+      const targetCol = Number(targetSquare[3]);
 
-      targetPiece = activePieces.find(
-        ({ position }) => position[0] === targetRow && position[1] === targetCol
-      );
+      const targetPiece = findElement(targetRow, targetCol, activePiecesLeft);
 
-      console.log(targetPiece);
-
+      let capturedPieceIndex = -1;
       if (targetPiece !== undefined) {
-        capturedPieceIndex = activePieces.indexOf(targetPiece);
+        capturedPieceIndex = activePiecesLeft.indexOf(targetPiece);
       }
 
-      isSameSquare = activatedPieceSquare === targetSquare;
-      isOccupied = targetPiece !== undefined;
-      isSameColor = isOccupied && targetPiece.color === activatedPiece.color;
-
-      console.log(activePieces[0]);
+      const isSameSquare = activatedPieceSquareLeft === targetSquare;
+      const isOccupied = targetPiece !== undefined;
+      const isSameColor =
+        isOccupied && targetPiece.color === activatedPieceLeft.color;
+      let isValidMove = false;
+      let inCheck = false;
+      let inCheckNext = false;
 
       // not run if targeting pieces of the same color
       if (!isSameColor) {
-        if (state === 2) {
-          inCheck = checkFor("white", activePieces);
-          inCheckNext = nextMoveCheck("white", isOccupied);
+        if (stateLeft === 2) {
+          const inCheck = checkFor("white", activePiecesLeft);
+          const inCheckNext = nextMoveCheck(
+            "white",
+            isOccupied,
+            activePiecesLeft,
+            "left",
+            targetRow,
+            targetCol,
+            capturedPieceIndex
+          );
         } else {
-          inCheck = checkFor("black", activePieces);
-          inCheckNext = nextMoveCheck("black", isOccupied);
+          inCheck = checkFor("black", activePiecesLeft);
+          inCheckNext = nextMoveCheck(
+            "black",
+            isOccupied,
+            activePiecesLeft,
+            "left",
+            targetRow,
+            targetCol,
+            capturedPieceIndex
+          );
         }
       } else {
         inCheck = false;
         inCheckNext = false;
       }
 
-      if (activatedPiece.type === "pawn" && isOccupied & !isSameColor) {
-        isValidMove = activatedPiece.checkCaptureMove(targetRow, targetCol);
+      if (activatedPieceLeft.type === "pawn" && isOccupied & !isSameColor) {
+        isValidMove = activatedPieceLeft.checkCaptureMove(
+          targetRow,
+          targetCol,
+          activePiecesLeft
+        );
       } else {
-        isValidMove = activatedPiece.checkValidMove(targetRow, targetCol);
+        isValidMove = activatedPieceLeft.checkValidMove(
+          targetRow,
+          targetCol,
+          activePiecesLeft,
+          "left"
+        );
       }
-
-      console.log(`incheck value before moving is ${inCheck}`);
-      console.log(`inchecknext value after moving is ${inCheckNext}`);
 
       // same square
       if (isSameSquare) {
-        logDisplay.innerText = "cancelled";
-        unhighlightSquare(activatedPieceRow, activatedPieceCol);
-        state--;
+        logDisplayLeft.innerText = "cancelled";
+        unhighlightSquare(activatedPieceRowLeft, activatedPieceColLeft, "left");
+        stateLeft--;
       }
       // different square
       else {
         // different square => if valid move or color is different
         if (!isSameColor && isValidMove) {
           if (!inCheck && inCheckNext) {
-            logDisplay.innerText = "invalid move - king is moved into check";
-            state--;
-            unhighlightSquare(activatedPieceRow, activatedPieceCol);
+            logDisplayLeft.innerText =
+              "invalid move - king is moved into check";
+            stateLeft--;
+            unhighlightSquare(
+              activatedPieceRowLeft,
+              activatedPieceColLeft,
+              "left"
+            );
           } else if (inCheck && inCheckNext) {
-            logDisplay.innerText = "invalid move - king is still in check";
-            state--;
-            unhighlightSquare(activatedPieceRow, activatedPieceCol);
+            logDisplayLeft.innerText = "invalid move - king is still in check";
+            stateLeft--;
+            unhighlightSquare(
+              activatedPieceRowLeft,
+              activatedPieceColLeft,
+              "left"
+            );
           } else {
-            logDisplay.innerText = `moved`;
-            activePieces[activePieceIndex].position = [targetRow, targetCol];
-            unhighlightSquare(activatedPieceRow, activatedPieceCol);
+            logDisplayLeft.innerText = `moved`;
+            activePiecesLeft[activePieceIndexLeft].position = [
+              targetRow,
+              targetCol,
+            ];
+            unhighlightSquare(
+              activatedPieceRowLeft,
+              activatedPieceColLeft,
+              "left"
+            );
             if (isOccupied) {
-              if (activePieces[capturedPieceIndex].color === "white") {
-                capturedWhite.push(activePieces.splice(capturedPieceIndex, 1));
-                addCaptured("white", targetSquare);
+              if (activePiecesLeft[capturedPieceIndex].color === "white") {
+                capturedWhiteLeft.push(
+                  activePiecesLeft.splice(capturedPieceIndex, 1)
+                );
+                addCaptured("white", targetSquare, "Left");
               } else {
-                capturedBlack.push(activePieces.splice(capturedPieceIndex, 1));
-                addCaptured("black", targetSquare);
+                capturedBlackLeft.push(
+                  activePiecesLeft.splice(capturedPieceIndex, 1)
+                );
+                addCaptured("black", targetSquare, "Left");
               }
 
               const temp = Math.floor(Math.random() * 2);
-              logDisplay.innerHTML = `captured ${emoji[temp]}`;
+              logDisplayLeft.innerHTML = `captured ${emoji[temp]}`;
             }
 
-            if (activatedPiece.type === "pawn") {
-              activatedPiece.isNew = false;
-            } else if (activatedPiece.type === "rook") {
-              activatedPiece.isNew = false;
-            } else if (activatedPiece.type === "king") {
-              activatedPiece.isNew = false;
+            if (activatedPieceLeft.type === "pawn") {
+              activatedPieceLeft.isNew = false;
+            } else if (activatedPieceLeft.type === "rook") {
+              activatedPieceLeft.isNew = false;
+            } else if (activatedPieceLeft.type === "king") {
+              activatedPieceLeft.isNew = false;
             }
 
-            stateIncrement();
+            stateIncrement("left");
             updateHTML(
-              activatedPieceRow,
-              activatedPieceCol,
+              activatedPieceRowLeft,
+              activatedPieceColLeft,
               targetRow,
-              targetCol
+              targetCol,
+              "left"
             );
           }
         } else {
-          logDisplay.innerText = "invalid move";
-          unhighlightSquare(activatedPieceRow, activatedPieceCol);
-          state--;
+          logDisplayLeft.innerText = "invalid move";
+          unhighlightSquare(
+            activatedPieceRowLeft,
+            activatedPieceColLeft,
+            "left"
+          );
+          stateLeft--;
         }
       }
     }
-    console.log(`current state is ${state}`);
+    console.log(`current state is ${stateLeft}`);
   }
 }
 
