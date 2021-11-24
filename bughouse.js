@@ -11,11 +11,15 @@ const colorYellow = "yellow";
 for (let i = 0; i < 8; i++) {
   for (let j = 0; j < 8; j++) {
     if ((i + j) % 2 === 0) {
-      const thisSquare = document.getElementById(`r${i}c${j}`);
-      thisSquare.style.backgroundImage = backgroundLight;
+      const thisSquareLeft = document.getElementById(`r${i}c${j}`);
+      const thisSquareRight = document.getElementById(`R${i}C${j}`);
+      thisSquareLeft.style.backgroundImage = backgroundLight;
+      thisSquareRight.style.backgroundImage = backgroundLight;
     } else {
-      const thisSquare = document.getElementById(`r${i}c${j}`);
-      thisSquare.style.backgroundImage = backgroundDark;
+      const thisSquareLeft = document.getElementById(`r${i}c${j}`);
+      const thisSquareRight = document.getElementById(`R${i}C${j}`);
+      thisSquareLeft.style.backgroundImage = backgroundDark;
+      thisSquareRight.style.backgroundImage = backgroundDark;
     }
   }
 }
