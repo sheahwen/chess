@@ -419,6 +419,11 @@ function highlightSquare(squareId) {
   activatedHTML.style.backgroundColor = colorYellow;
 }
 
+function addCaptured(color, id) {
+  const box = document.getElementById(`captured${color}Display`);
+  box.innerHTML += document.getElementById(id).innerHTML;
+}
+
 function checkFor(color, arr, row = undefined, col = undefined) {
   // locating the kings
   if (row === undefined) {
@@ -567,9 +572,14 @@ let inCheckNext = false;
 // array to store captured pieces
 const capturedWhite = [];
 const capturedBlack = [];
+let capturedWhiteString = "";
+let capturedBlackString = "";
 
 // querySelector
 const logDisplay = document.getElementById("log");
+
+// for fun
+const emoji = ["&#x1f622", "&#x1f44f"];
 
 // ------------ upon clicking the start button
 function startFunction() {
@@ -686,11 +696,14 @@ function gamePlay(e) {
             if (isOccupied) {
               if (activePieces[capturedPieceIndex].color === "white") {
                 capturedWhite.push(activePieces.splice(capturedPieceIndex, 1));
+                addCaptured("white", targetSquare);
               } else {
                 capturedBlack.push(activePieces.splice(capturedPieceIndex, 1));
+                addCaptured("black", targetSquare);
               }
 
-              logDisplay.innerText = `captured`;
+              const temp = Math.floor(Math.random() * 2);
+              logDisplay.innerHTML = `captured ${emoji[temp]}`;
             }
 
             if (activatedPiece.type === "pawn") {
