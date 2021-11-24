@@ -10,7 +10,7 @@
   <body>
   <div id=both>=
     <div class="container" id=containerLeft>
-    <div id="board">
+    <div class="board" id="boardLeft">
       <div class="row" id="row7">
         <div class="square" id="r7c0">&#9820</div>
         <div class="square" id="r7c1">&#9822</div>
@@ -104,14 +104,26 @@
       </div>
     </div>
 
-    <div class="log" id="log">
+    <div class="log" id="logLeft">
       <button>Start</button>
     </div>
 
   </div>
 
   <div class="container" id=containerRight>
-    <div id="boardRight">
+
+    <div class=capturedContainer>
+      <div class=capturedBox id=capturedBoxBlackRight>
+        <h3>Black captured pieces</h3>
+        <p class=capturedText id="capturedblackDisplayRight"></p>
+      </div>
+      <div class=capturedBox id=capturedBoxWhiteRight>
+        <h3>White captured pieces</h3>
+        <p class=capturedText id="capturedwhiteDisplayRight"></p>
+      </div>
+    </div>
+    
+    <div class = "board" id="boardRight">
       <div class="row" id="ROW7">
         <div class="square" id="R7C0">&#9820</div>
         <div class="square" id="R7C1">&#9822</div>
@@ -194,18 +206,7 @@
       </div>
     </div> 
 
-    <div class=capturedContainer>
-      <div class=capturedBox id=capturedBoxBlackRight>
-        <h3>Black captured pieces</h3>
-        <p class=capturedText id="capturedblackDisplayRight"></p>
-      </div>
-      <div class=capturedBox id=capturedBoxWhiteRight>
-        <h3>White captured pieces</h3>
-        <p class=capturedText id="capturedwhiteDisplayRight"></p>
-      </div>
-    </div>
-
-    <div id="log">
+    <div class= "log" id="logRight">
     </div>
 
   </div>

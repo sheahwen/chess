@@ -377,12 +377,15 @@ function castling(row1, col1, row2, col2, arr, board) {
 //-------------creating pieces
 
 const activePiecesLeft = [];
+const activePiecesRight = [];
 
 for (let i = 0; i < 8; i++) {
   activePiecesLeft.push(new Pawn("pawn", "white", [1, i]));
+  activePiecesRight.push(new Pawn("pawn", "white", [1, i]));
 }
 for (let i = 0; i < 8; i++) {
   activePiecesLeft.push(new Pawn("pawn", "black", [6, i]));
+  activePiecesRight.push(new Pawn("pawn", "black", [6, i]));
 }
 
 activePiecesLeft.push(new Rook("rook", "white", [0, 0]));
@@ -402,8 +405,64 @@ activePiecesLeft.push(new Queen("queen", "black", [7, 3]));
 activePiecesLeft.push(new King("king", "white", [0, 4]));
 activePiecesLeft.push(new King("king", "black", [7, 4]));
 
-console.log(`activePiecesLeft array contains`);
+activePiecesRight.push(new Rook("rook", "white", [0, 0]));
+activePiecesRight.push(new Rook("rook", "white", [0, 7]));
+activePiecesRight.push(new Rook("rook", "black", [7, 0]));
+activePiecesRight.push(new Rook("rook", "black", [7, 7]));
+activePiecesRight.push(new Knight("knight", "white", [0, 1]));
+activePiecesRight.push(new Knight("knight", "white", [0, 6]));
+activePiecesRight.push(new Knight("knight", "black", [7, 1]));
+activePiecesRight.push(new Knight("knight", "black", [7, 6]));
+activePiecesRight.push(new Bishop("bishop", "white", [0, 2]));
+activePiecesRight.push(new Bishop("bishop", "white", [0, 5]));
+activePiecesRight.push(new Bishop("bishop", "black", [7, 2]));
+activePiecesRight.push(new Bishop("bishop", "black", [7, 5]));
+activePiecesRight.push(new Queen("queen", "white", [0, 3]));
+activePiecesRight.push(new Queen("queen", "black", [7, 3]));
+activePiecesRight.push(new King("king", "white", [0, 4]));
+activePiecesRight.push(new King("king", "black", [7, 4]));
+
 console.log(activePiecesLeft);
+console.log(activePiecesRight);
+
+// ----------------------- variable declaration
+
+// ==> Right board
+
+// states = ["activated_piece_white", "destination_square_white".... then black]
+let stateLeft = 1;
+let stateRight = 1;
+
+// Activated piece, e.g. pawn_white_1
+let activatedPieceLeft = "";
+let activatedPieceRight = "";
+
+// Activated piece square aka first click square coordination
+let activatedPieceSquareLeft = "";
+let activatedPieceSquareRight = "";
+
+// row and column number of activated piece square
+let activatedPieceRowLeft = 0;
+let activatedPieceColLeft = 0;
+let activatedPieceRowRight = 0;
+let activatedPieceColRight = 0;
+
+// index of the activated piece in the activePieces array
+let activePieceIndexLeft = 0;
+let activePieceIndexRight = 0;
+
+// array to store captured pieces
+const capturedWhiteLeft = [];
+const capturedBlackLeft = [];
+const capturedWhiteRight = [];
+const capturedBlackRight = [];
+
+// querySelector
+const logDisplayLeft = document.getElementById("logLeft");
+const logDisplayRight = document.getElementById("logRight");
+
+// =>  for fun
+const emoji = ["&#x1f622", "&#x1f44f"];
 
 // ------------ function declarations
 
@@ -573,71 +632,20 @@ function findElement(row, col, arr) {
   return arr.find(({ position }) => position[0] === row && position[1] === col);
 }
 
-// ----------------------- variable declaration
-
-// ==> Right board
-
-// states = ["activated_piece_white", "destination_square_white".... then black]
-let stateLeft = 1;
-
-// Activated piece, e.g. pawn_white_1
-let activatedPieceLeft = "";
-
-// Activated piece square aka first click square coordination
-let activatedPieceSquareLeft = "";
-
-// row and column number of activated piece square
-let activatedPieceRowLeft = 0;
-let activatedPieceColLeft = 0;
-
-// index of the activated piece in the activePieces array
-let activePieceIndexLeft = 0;
-
-// array to store captured pieces
-const capturedWhiteLeft = [];
-const capturedBlackLeft = [];
-
-// querySelector
-const logDisplayLeft = document.getElementById("log");
-
-// =>  for fun
-const emoji = ["&#x1f622", "&#x1f44f"];
-
-// ==> Right board
-
-// states = ["activated_piece_white", "destination_square_white".... then black]
-let stateRight = 1;
-
-// Activated piece, e.g. pawn_white_1
-let activatedPieceRight = "";
-
-// Activated piece square aka first click square coordination
-let activatedPieceSquareRight = "";
-
-// row and column number of activated piece square
-let activatedPieceRowRight = 0;
-let activatedPieceColRight = 0;
-
-// index of the activated piece in the activePieces array
-let activePieceIndexRight = 0;
-
-// array to store captured pieces
-const capturedWhiteRight = [];
-const capturedBlackRight = [];
-
-// querySelector
-const logDisplayRight = document.getElementById("log");
-
 // ------------ upon clicking the start button
 function startFunction() {
   document.querySelector("button").remove();
-  document.querySelector("#board").addEventListener("click", gamePlay);
-  document.querySelector("#log").innerText = "White to start";
+  document.querySelector("#boardLeft").addEventListener("click", gamePlayLeft);
+  document
+    .querySelector("#boardRight")
+    .addEventListener("click", gamePlayRight);
+  logDisplayRight.innerText = "White to start";
+  logDisplayLeft.innerText = "White to start";
 }
 
 // ------------- main function
 
-function gamePlay(e) {
+function gamePlayLeft(e) {
   if (e.target.className === "square") {
     if (stateLeft === 1 || stateLeft === 3) {
       //first click
@@ -822,6 +830,202 @@ function gamePlay(e) {
       }
     }
     console.log(`current state is ${stateLeft}`);
+  }
+}
+
+function gamePlayRight(e) {
+  if (e.target.className === "square") {
+    if (stateRight === 1 || stateRight === 3) {
+      //first click
+
+      activatedPieceSquareRight = e.target.id;
+      activatedPieceRowRight = Number(activatedPieceSquareRight[1]);
+      activatedPieceColRight = Number(activatedPieceSquareRight[3]);
+
+      activatedPieceRight = findElement(
+        activatedPieceRowRight,
+        activatedPieceColRight,
+        activePiecesRight
+      );
+      activePieceIndexRight = activePiecesRight.indexOf(activatedPieceRight);
+
+      // if empty square
+      if (activatedPieceRight === undefined) {
+        logDisplayRight.innerText = "empty square selected";
+      }
+
+      // if not empty square => check for color ~~~ proceed
+      else {
+        if (
+          (stateRight === 1 && activatedPieceRight.color === "white") ||
+          (stateRight === 3 && activatedPieceRight.color === "black")
+        ) {
+          logDisplayRight.innerText = `${activatedPieceRight.type} at ${activatedPieceRowRight},${activatedPieceColRight} is selected`;
+          highlightSquare(
+            activatedPieceSquareRight,
+            activePiecesRight,
+            "right"
+          );
+          stateIncrement("right");
+        } else {
+          logDisplayRight.innerText = "wrong color is selected";
+        }
+      }
+    } else if (stateRight === 2 || stateRight === 4) {
+      //second click
+
+      const targetSquare = e.target.id;
+      const targetRow = Number(targetSquare[1]);
+      const targetCol = Number(targetSquare[3]);
+
+      const targetPiece = findElement(targetRow, targetCol, activePiecesRight);
+
+      let capturedPieceIndex = -1;
+      if (targetPiece !== undefined) {
+        capturedPieceIndex = activePiecesRight.indexOf(targetPiece);
+      }
+
+      const isSameSquare = activatedPieceSquareRight === targetSquare;
+      const isOccupied = targetPiece !== undefined;
+      const isSameColor =
+        isOccupied && targetPiece.color === activatedPieceRight.color;
+      let isValidMove = false;
+      let inCheck = false;
+      let inCheckNext = false;
+
+      // not run if targeting pieces of the same color
+      if (!isSameColor) {
+        if (stateRight === 2) {
+          const inCheck = checkFor("white", activePiecesRight);
+          const inCheckNext = nextMoveCheck(
+            "white",
+            isOccupied,
+            activePiecesRight,
+            "right",
+            targetRow,
+            targetCol,
+            capturedPieceIndex
+          );
+        } else {
+          inCheck = checkFor("black", activePiecesRight);
+          inCheckNext = nextMoveCheck(
+            "black",
+            isOccupied,
+            activePiecesRight,
+            "right",
+            targetRow,
+            targetCol,
+            capturedPieceIndex
+          );
+        }
+      } else {
+        inCheck = false;
+        inCheckNext = false;
+      }
+
+      if (activatedPieceRight.type === "pawn" && isOccupied & !isSameColor) {
+        isValidMove = activatedPieceRight.checkCaptureMove(
+          targetRow,
+          targetCol,
+          activePiecesRight
+        );
+      } else {
+        isValidMove = activatedPieceRight.checkValidMove(
+          targetRow,
+          targetCol,
+          activePiecesRight,
+          "right"
+        );
+      }
+
+      // same square
+      if (isSameSquare) {
+        logDisplayRight.innerText = "cancelled";
+        unhighlightSquare(
+          activatedPieceRowRight,
+          activatedPieceColRight,
+          "right"
+        );
+        stateRight--;
+      }
+      // different square
+      else {
+        // different square => if valid move or color is different
+        if (!isSameColor && isValidMove) {
+          if (!inCheck && inCheckNext) {
+            logDisplayRight.innerText =
+              "invalid move - king is moved into check";
+            stateRight--;
+            unhighlightSquare(
+              activatedPieceRowRight,
+              activatedPieceColRight,
+              "right"
+            );
+          } else if (inCheck && inCheckNext) {
+            logDisplayRight.innerText = "invalid move - king is still in check";
+            stateRight--;
+            unhighlightSquare(
+              activatedPieceRowRight,
+              activatedPieceColRight,
+              "right"
+            );
+          } else {
+            logDisplayRight.innerText = `moved`;
+            activePiecesRight[activePieceIndexRight].position = [
+              targetRow,
+              targetCol,
+            ];
+            unhighlightSquare(
+              activatedPieceRowRight,
+              activatedPieceColRight,
+              "right"
+            );
+            if (isOccupied) {
+              if (activePiecesRight[capturedPieceIndex].color === "white") {
+                capturedWhiteRight.push(
+                  activePiecesRight.splice(capturedPieceIndex, 1)
+                );
+                addCaptured("white", targetSquare, "Right");
+              } else {
+                capturedBlackRight.push(
+                  activePiecesRight.splice(capturedPieceIndex, 1)
+                );
+                addCaptured("black", targetSquare, "Right");
+              }
+
+              const temp = Math.floor(Math.random() * 2);
+              logDisplayRight.innerHTML = `captured ${emoji[temp]}`;
+            }
+
+            if (activatedPieceRight.type === "pawn") {
+              activatedPieceRight.isNew = false;
+            } else if (activatedPieceRight.type === "rook") {
+              activatedPieceRight.isNew = false;
+            } else if (activatedPieceRight.type === "king") {
+              activatedPieceRight.isNew = false;
+            }
+
+            stateIncrement("right");
+            updateHTML(
+              activatedPieceRowRight,
+              activatedPieceColRight,
+              targetRow,
+              targetCol,
+              "right"
+            );
+          }
+        } else {
+          logDisplayRight.innerText = "invalid move";
+          unhighlightSquare(
+            activatedPieceRowRight,
+            activatedPieceColRight,
+            "right"
+          );
+          stateRight--;
+        }
+      }
+    }
+    console.log(`current state is ${stateRight}`);
   }
 }
 
