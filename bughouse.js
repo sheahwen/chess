@@ -676,6 +676,7 @@ function startFunction() {
     .addEventListener("click", gamePlayRight);
   logDisplayRight.innerText = "White to start";
   logDisplayLeft.innerText = "White to start";
+  countingDown();
 }
 
 // ------------- main function
@@ -1204,6 +1205,93 @@ function gamePlayRight(e) {
     }
     console.log(`current right state is ${stateRight}`);
   }
+}
+
+// timer function
+
+const STARTMIN = 10;
+let timeBlackLeft = STARTMIN * 60 * 1000;
+let timeWhiteLeft = STARTMIN * 60 * 1000;
+let timeWhiteRight = STARTMIN * 60 * 1000;
+let timeBlackRight = STARTMIN * 60 * 1000;
+
+document.getElementById("timerBlackLeft").innerHTML = "10:00";
+document.getElementById("timerWhiteLeft").innerHTML = "10:00";
+document.getElementById("timerBlackRight").innerHTML = "10:00";
+document.getElementById("timerWhiteRight").innerHTML = "10:00";
+
+function formatTime(time) {
+  let min = Math.floor(time / 1000 / 60);
+  let second = Math.floor((time / 1000) % 60);
+
+  if (min < 10) {
+    min = `0${min}`;
+  }
+  if (second < 10) {
+    second = `0${second}`;
+  }
+  return `${min}:${second}`;
+}
+function decrement(time, id) {
+  time -= 1000;
+  document.getElementById(id).innerHTML = formatTime(time);
+}
+
+let timerLeft;
+let timerRight;
+
+function decrementBL() {
+  timeBlackLeft -= 1000;
+  document.getElementById("timerBlackLeft").innerHTML =
+    formatTime(timeBlackLeft);
+}
+function decrementWL() {
+  timeWhiteLeft -= 1000;
+  document.getElementById("timerWhiteLeft").innerHTML =
+    formatTime(timeWhiteLeft);
+}
+function decrementBR() {
+  timeBlackRight -= 1000;
+  document.getElementById("timerBlackRight").innerHTML =
+    formatTime(timeBlackRight);
+}
+function decrementWR() {
+  timeWhiteRight -= 1000;
+  document.getElementById("timerWhiteRight").innerHTML =
+    formatTime(timeWhiteRight);
+}
+
+// function countingDown() {
+//   if (stateLeft === 1 || stateLeft === 2) {
+//     // clearInterval(timerLeft);
+//     timerLeft = setInterval(decrementWL, 1000);
+//   } else {
+//     // clearInterval(timerLeft);
+//     timerLeft = setInterval(decrementBL, 1000);
+//   }
+//   if (stateRight === 1 || stateRight === 2) {
+//     // clearInterval(timerRight);
+//     timerRight = setInterval(decrementWR, 1000);
+//   } else {
+//     // clearInterval(timerRight);
+//     timerRight = setInterval(decrementBR, 1000);
+//   }
+// }
+function countingDown() {
+  timerLeft = setInterval(switchTimerLeft, 1000);
+  timerRight = setInterval(switchTimerRight, 1000);
+}
+
+function switchTimerLeft() {
+  if (stateLeft === 1 || stateLeft === 2) {
+    decrementWL();
+  } else decrementBL();
+}
+
+function switchTimerRight() {
+  if (stateRight === 1 || stateRight === 2) {
+    decrementWR();
+  } else decrementBR();
 }
 
 document.querySelector("button").addEventListener("click", startFunction);
