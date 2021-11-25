@@ -1,6 +1,8 @@
 # Bughouse chess
 A simple and fun website created with Javascript for bughouse chess. 
 
+![](https://media.giphy.com/media/hzAR4V86zuCKQKe6kP/giphy.gif)
+
 ## Introduction to bughouse chess
 Bughouse is a chess variant that is played by four players divided into two teams of two players each. Allied players work together to checkmate someone from the other side or make them run out of time. While most of the standard chess rules are still applied to Bughouse, the main difference is that the captured pieces can be "recycled" on the other board. 
 
@@ -60,5 +62,3 @@ As much as the project wanted to provide a complete Bughouse playing experience,
 - Restriction to prevent a piece is dropped and results in checkmate
 
 But still, keep a lookout to this webstie for future updates! 
-
-![](https://media.giphy.com/media/hzAR4V86zuCKQKe6kP/giphy.gif)
