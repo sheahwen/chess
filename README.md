@@ -58,7 +58,7 @@ As much as the project wanted to provide a complete Bughouse playing experience,
 
 - Promotion of pawn at first or eighth rank
 - En passant capture
-- Detection of checkmate
-- Restriction to prevent a piece is dropped and results in checkmate
+- Detection of checkmate and stalemate
+- Restriction to prevent a piece being dropped and results in checkmate
 
 But still, keep a lookout to this webstie for future updates! 
