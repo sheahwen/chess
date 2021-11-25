@@ -1,6 +1,8 @@
 # Bughouse chess
 A simple and fun website created with Javascript for bughouse chess. 
 
+![](https://media.giphy.com/media/hzAR4V86zuCKQKe6kP/giphy.gif)
+
 ## Introduction to bughouse chess
 Bughouse is a chess variant that is played by four players divided into two teams of two players each. Allied players work together to checkmate someone from the other side or make them run out of time. While most of the standard chess rules are still applied to Bughouse, the main difference is that the captured pieces can be "recycled" on the other board. 
 
@@ -27,18 +29,36 @@ This project has the containers that make up the general layout (board, timer ar
 - Animating timer to reduce in width based on remaining time
 - Creation of game logics (and this... brings us to "approach"!)
 
-## Approach
-After many many sleepless afternoons, the final approach taken to build this project is as follows: 
+## Approach 
 
-#### Pieces creation
+#### Pieces creation and moves
+A class is created for each piece type (e.g. pawn, rook, queen etc). All classes have one method for their valid move and three basic attributes - type, color and position. Besides, pawn, rook and king have additional attribute to track if they have been moved during the game, which determined if they are eligible for two square advancement and castling respectively. A class instance has been created for each piece on the board. Two arrays are created to monitor all the active piece on each board. Instead of images, the pieces are represented by Unicode chess symbols. 
 
+#### Position
+Coordinates of the square are stored in the square's id. The code retrieves the row and column of the target square from the id. 
 
-#### Check valid moves
-
-#### Open check 
+#### Check
+After passing the valid move test, the king is subject to check test. The move should need to fulfill 2 conditions, it should not put its own king into a check and if the king is in a check, it should bring the king out of the current check. The check function iterates through all the opponent's pieces in the active piece array to find valid move to the king's postion. 
 
 #### States and game flow
+4 different states are used in the game to keep track of players' turns and actions.They are:
+1. White's turn to choose a piece - can be a piece on a board or captured piece
+2. White's turn to move/drop the piece
+3. Black's turn to choose a piece - can be a piece on a board or captured piece
+4. Black's turn to move/drop the piece
 
-#### Scaling up
+Validation tests to test for inappropriate clicks based on currentt states are put in place. For example, players are unable to select white pieces at state 3. Or players cannot capture their own pieces. Or a piece is de-selected if it is clicked twice. 
 
+The two boards run in parallel and have different state counter, thus the turns are not interfered by one another. The timer for both White players start when the "start" button is clicked. The timer for the opponent immediately starts running when a move has be made i.e. state changed from 1 to 3 and vice versa. 
 
+The game continues like normal chess, except captured piece will be added to  teammate's captured piece stash. 
+
+## Unsolved problems
+As much as the project wanted to provide a complete Bughouse playing experience, there are some chess rules that the project has yet to implement due to time constraint.
+
+- Promotion of pawn at first or eighth rank
+- En passant capture
+- Detection of checkmate and stalemate
+- Restriction to prevent a piece being dropped and results in checkmate
+
+But still, keep a lookout to this webstie for future updates! 
