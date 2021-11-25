@@ -50,3 +50,13 @@ Validation tests to test for inappropriate clicks based on currentt states are p
 The two boards run in parallel and have different state counter, thus the turns are not interfered by one another. The timer for both White players start when the "start" button is clicked. The timer for the opponent immediately starts running when a move has be made i.e. state changed from 1 to 3 and vice versa. 
 
 The game continues like normal chess, except captured piece will be added to  teammate's captured piece stash. 
+
+## Unsolved problems
+As much as the project wanted to provide a complete Bughouse playing experience, there are some chess rules that the project has yet to implement due to time constraint.
+
+- Promotion of pawn at first or eighth rank
+- En passant capture
+- Detection of checkmate
+- Restriction to prevent a piece is dropped and results in checkmate
+
+But still, keep a lookout to this webstie for future updates! 
