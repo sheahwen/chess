@@ -669,7 +669,7 @@ function updateIndex(color, board, index, arr) {
 
 // ------------ upon clicking the start button
 function startFunction() {
-  document.querySelector("button").remove();
+  document.querySelector("#startButton").remove();
   document.querySelector("#boardLeft").addEventListener("click", gamePlayLeft);
   document
     .querySelector("#boardRight")
@@ -876,7 +876,7 @@ function gamePlayLeft(e) {
                 "left"
               );
             } else {
-              logDisplayLeft.innerText = `moved`;
+              logDisplayLeft.innerText = `${activatedPieceLeft.type} moved`;
               activePiecesLeft[activePieceIndexLeft].position = [
                 targetRow,
                 targetCol,
@@ -1111,7 +1111,7 @@ function gamePlayRight(e) {
                 "right"
               );
             } else {
-              logDisplayRight.innerText = `moved`;
+              logDisplayRight.innerText = `${activatedPieceRight.type} moved`;
               activePiecesRight[activePieceIndexRight].position = [
                 targetRow,
                 targetCol,
@@ -1226,7 +1226,7 @@ timerBL.innerText =
   timerWL.innerText =
   timerWR.innerText =
   timerBR.innerText =
-    "10:00";
+    `10:00`;
 
 function formatTime(time) {
   let min = Math.floor(time / 1000 / 60);
@@ -1316,10 +1316,29 @@ function changeColor(width, timer) {
 
 //--------------------for event listener
 
-document.querySelector("button").addEventListener("click", startFunction);
 document
   .querySelector("#capturedContainerLeft")
   .addEventListener("click", recyclingFunction);
 document
   .querySelector("#capturedContainerRight")
   .addEventListener("click", recyclingFunction);
+
+// ------------------for lobby items
+
+document.querySelector("#enter").addEventListener("click", removeLobby);
+document.querySelector("#introduction").addEventListener("click", showRule);
+document.querySelector("#enter2").addEventListener("click", removeLobby);
+
+function removeLobby() {
+  document.querySelector(".lobby").style.display = "none";
+  document.querySelector("#both").style.display = "flex";
+  document
+    .querySelector("#startButton")
+    .addEventListener("click", startFunction);
+  document.querySelector("body").style.backgroundColor = "white";
+}
+
+function showRule() {
+  document.querySelector(".displayOff").className = "rule";
+  document.querySelector(".lobbyContainer").classList.toggle("displayOff");
+}
