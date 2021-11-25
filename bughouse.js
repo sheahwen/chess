@@ -1215,10 +1215,18 @@ let timeWhiteLeft = STARTMIN * 60 * 1000;
 let timeWhiteRight = STARTMIN * 60 * 1000;
 let timeBlackRight = STARTMIN * 60 * 1000;
 
-document.getElementById("timerBlackLeft").innerHTML = "10:00";
-document.getElementById("timerWhiteLeft").innerHTML = "10:00";
-document.getElementById("timerBlackRight").innerHTML = "10:00";
-document.getElementById("timerWhiteRight").innerHTML = "10:00";
+const ONE_SEC_PERCENT = (1 / (STARTMIN * 60)) * 100;
+
+const timerBL = document.getElementById("timerBlackLeft");
+const timerWL = document.getElementById("timerWhiteLeft");
+const timerBR = document.getElementById("timerBlackRight");
+const timerWR = document.getElementById("timerWhiteRight");
+
+timerBL.innerText =
+  timerWL.innerText =
+  timerWR.innerText =
+  timerBR.innerText =
+    "10:00";
 
 function formatTime(time) {
   let min = Math.floor(time / 1000 / 60);
@@ -1232,56 +1240,24 @@ function formatTime(time) {
   }
   return `${min}:${second}`;
 }
-function decrement(time, id) {
-  time -= 1000;
-  document.getElementById(id).innerHTML = formatTime(time);
-}
 
 let timerLeft;
 let timerRight;
 
-function decrementBL() {
-  timeBlackLeft -= 1000;
-  document.getElementById("timerBlackLeft").innerHTML =
-    formatTime(timeBlackLeft);
-}
-function decrementWL() {
-  timeWhiteLeft -= 1000;
-  document.getElementById("timerWhiteLeft").innerHTML =
-    formatTime(timeWhiteLeft);
-}
-function decrementBR() {
-  timeBlackRight -= 1000;
-  document.getElementById("timerBlackRight").innerHTML =
-    formatTime(timeBlackRight);
-}
-function decrementWR() {
-  timeWhiteRight -= 1000;
-  document.getElementById("timerWhiteRight").innerHTML =
-    formatTime(timeWhiteRight);
-}
-
-// function countingDown() {
-//   if (stateLeft === 1 || stateLeft === 2) {
-//     // clearInterval(timerLeft);
-//     timerLeft = setInterval(decrementWL, 1000);
-//   } else {
-//     // clearInterval(timerLeft);
-//     timerLeft = setInterval(decrementBL, 1000);
-//   }
-//   if (stateRight === 1 || stateRight === 2) {
-//     // clearInterval(timerRight);
-//     timerRight = setInterval(decrementWR, 1000);
-//   } else {
-//     // clearInterval(timerRight);
-//     timerRight = setInterval(decrementBR, 1000);
-//   }
-// }
+//function to countdown the relevant timers
 function countingDown() {
-  timerLeft = setInterval(switchTimerLeft, 1000);
-  timerRight = setInterval(switchTimerRight, 1000);
+  if (
+    timeBlackLeft > 0 &&
+    timeWhiteLeft > 0 &&
+    timeBlackRight > 0 &&
+    timeWhiteRight > 0
+  ) {
+    timerLeft = setInterval(switchTimerLeft, 1000);
+    timerRight = setInterval(switchTimerRight, 1000);
+  }
 }
 
+//functions to determine the active timer based on states
 function switchTimerLeft() {
   if (stateLeft === 1 || stateLeft === 2) {
     decrementWL();
@@ -1293,6 +1269,52 @@ function switchTimerRight() {
     decrementWR();
   } else decrementBR();
 }
+
+//functions to decrement each timer
+function decrementBL() {
+  timeBlackLeft -= 1000;
+  timerBL.innerHTML = formatTime(timeBlackLeft);
+  const width = (timeBlackLeft / (STARTMIN * 60 * 1000)) * 160;
+  timerBL.style.width = `${width}px`;
+  changeColor(width, timerBL);
+}
+
+function decrementWL() {
+  timeWhiteLeft -= 1000;
+  timerWL.innerHTML = formatTime(timeWhiteLeft);
+  const width = (timeWhiteLeft / (STARTMIN * 60 * 1000)) * 160;
+  timerWL.style.width = `${width}px`;
+  changeColor(width, timerWL);
+}
+function decrementBR() {
+  timeBlackRight -= 1000;
+  timerBR.innerHTML = formatTime(timeBlackRight);
+  const width = (timeBlackRight / (STARTMIN * 60 * 1000)) * 160;
+  timerBR.style.width = `${width}px`;
+  changeColor(width, timerBR);
+}
+function decrementWR() {
+  timeWhiteRight -= 1000;
+  timerWR.innerHTML = formatTime(timeWhiteRight);
+  const width = (timeWhiteRight / (STARTMIN * 60 * 1000)) * 160;
+  timerWR.style.width = `${width}px`;
+  changeColor(width, timerWR);
+}
+
+function changeColor(width, timer) {
+  if (width < 32) {
+    timer.style.backgroundColor = "#282419";
+    timer.style.color = "red";
+  } else if (width < 64) {
+    timer.style.backgroundColor = "#C43726";
+  } else if (width < 96) {
+    timer.style.backgroundColor = "#F1DCBD";
+  } else if (width < 128) {
+    timer.style.backgroundColor = "#449A6D";
+  }
+}
+
+//--------------------for event listener
 
 document.querySelector("button").addEventListener("click", startFunction);
 document
