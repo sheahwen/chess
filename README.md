@@ -60,3 +60,5 @@ As much as the project wanted to provide a complete Bughouse playing experience,
 - Restriction to prevent a piece is dropped and results in checkmate
 
 But still, keep a lookout to this webstie for future updates! 
+
+![](https://tenor.com/view/congratulations-anya-taylor-joy-beth-harmon-the-queens-gambit-shaking-hands-gif-20432820)
